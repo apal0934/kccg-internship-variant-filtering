@@ -1,4 +1,4 @@
-import { Button, Card, Form, Icon, Input, Layout, Select } from "antd";
+import { Button, Card, Form, Layout, Select } from "antd";
 import React, { Component } from "react";
 
 import FormItem from "antd/lib/form/FormItem";
@@ -43,11 +43,12 @@ export class Researcher extends Component {
             return (
                 <Redirect
                     to={{
-                        pathname: "/researcher/2",
+                        pathname: "/validation",
                         state: {
                             orgType: this.state.values.orgType,
                             hpo: this.state.values.hpo,
-                            purpose: this.state.values.purpose
+                            purpose: this.state.values.purpose,
+                            IP: this.props.IP
                         }
                     }}
                 />
