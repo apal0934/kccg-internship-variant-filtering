@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from mongoengine import connect, disconnect_all
 from starlette.graphql import GraphQLApp
 
+from dummy_genome_database.mutations.mutations import Mutations
+
 
 class Query(graphene.ObjectType):
     hello = graphene.String(name=graphene.String(default_value="stranger"))
@@ -24,4 +26,4 @@ def shutdown_db_client():
     disconnect_all
 
 
-app.add_route("/", GraphQLApp(schema=graphene.Schema(query=Query)))
+app.add_route("/", GraphQLApp(schema=graphene.Schema(query=Query, mutation=Mutations)))
