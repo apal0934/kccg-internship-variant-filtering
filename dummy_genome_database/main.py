@@ -2,6 +2,7 @@ import graphene
 from fastapi import FastAPI
 from mongoengine import connect, disconnect_all
 from starlette.graphql import GraphQLApp
+from starlette.middleware.cors import CORSMiddleware
 
 from dummy_genome_database.models.genome import GenomeModel
 from dummy_genome_database.mutations.mutations import Mutations
@@ -34,4 +35,12 @@ def shutdown_db_client():
     disconnect_all
 
 
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 app.add_route("/", GraphQLApp(schema=graphene.Schema(query=Query, mutation=Mutations)))
