@@ -1,4 +1,4 @@
-from graphene import Field, Mutation, Int, List, String
+from graphene import Field, Int, List, Mutation, String
 
 from dummy_genome_database.models.genome import GenomeModel
 from dummy_genome_database.object_types.genome import Genome
@@ -9,7 +9,7 @@ class CreateGenome(Mutation):
         genome_id = Int(required=True)
         variants = List(Int)
 
-    genome = Field(lambda : Genome)
+    genome = Field(lambda: Genome)
 
     @staticmethod
     def mutate(root, info, genome_id, variants=[]):

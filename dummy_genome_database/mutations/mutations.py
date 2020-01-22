@@ -1,9 +1,9 @@
 from graphene import ObjectType
 
 from dummy_genome_database.mutations.genome import (
+    AddVariants,
     CreateGenome,
     DeleteGenome,
-    AddVariants
 )
 
 

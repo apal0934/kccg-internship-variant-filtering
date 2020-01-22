@@ -3,8 +3,8 @@ from fastapi import FastAPI
 from mongoengine import connect, disconnect_all
 from starlette.graphql import GraphQLApp
 
-from dummy_genome_database.mutations.mutations import Mutations
 from dummy_genome_database.models.genome import GenomeModel
+from dummy_genome_database.mutations.mutations import Mutations
 from dummy_genome_database.object_types.genome import Genome
 
 
