@@ -1,3 +1,9 @@
 {
-  "eslint.workingDirectories": ["./airlock-interface"]
+  "eslint.workingDirectories": [
+    "./airlock-interface"
+  ],
+  "python.pythonPath": "/home/alex/.local/share/virtualenvs/airlock-nGIn5Fk1/bin/python",
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true
 }
