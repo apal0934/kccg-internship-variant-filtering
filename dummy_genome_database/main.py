@@ -4,13 +4,19 @@ from mongoengine import connect, disconnect_all
 from starlette.graphql import GraphQLApp
 
 from dummy_genome_database.mutations.mutations import Mutations
+from dummy_genome_database.models.genome import GenomeModel
+from dummy_genome_database.object_types.genome import Genome
 
 
 class Query(graphene.ObjectType):
-    hello = graphene.String(name=graphene.String(default_value="stranger"))
+    genomes = graphene.List(Genome)
+    genome = graphene.Field(Genome, genome_id=graphene.String())
 
-    def resolve_hello(self, info, name):
-        return "Hello " + name
+    def resolve_genomes(self, info):
+        return list(GenomeModel.objects.all())
+
+    def resolve_genome(self, info, genome_id):
+        return GenomeModel.objects.get(pk=genome_id)
 
 
 app = FastAPI()
