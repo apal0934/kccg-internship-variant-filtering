@@ -10,7 +10,7 @@ import Researcher from "./pages/Researcher";
 import Validation from "./pages/Validation";
 
 function App() {
-    const IP = "172.21.78.131";
+    const IP = "localhost";
 
     return (
         <div>
