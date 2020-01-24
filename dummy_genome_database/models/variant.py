@@ -1,6 +1,7 @@
 from mongoengine import Document
-from mongoengine.fields import StringField
+from mongoengine.fields import StringField, ListField
 
 
 class VariantModel(Document):
-    hpo_term = StringField()
+    name = StringField()
+    hpo_terms = ListField(StringField())

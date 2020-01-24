@@ -1,4 +1,4 @@
-from graphene import Field, String, Mutation
+from graphene import Field, String, Mutation, List
 
 from dummy_genome_database.models.variant import VariantModel
 from dummy_genome_database.object_types.variant import Variant
@@ -6,12 +6,13 @@ from dummy_genome_database.object_types.variant import Variant
 
 class CreateVariant(Mutation):
     class Arguments:
-        hpo_term = String(required=True)
+        name = String(required=True)
+        hpo_terms = List(String)
 
     variant = Field(lambda: Variant)
 
-    def mutate(root, info, hpo_term):
-        variant = VariantModel(hpo_term=hpo_term)
+    def mutate(root, info, name, hpo_terms):
+        variant = VariantModel(name=name, hpo_terms=hpo_terms)
         variant.save()
 
         return CreateVariant(variant=variant)
