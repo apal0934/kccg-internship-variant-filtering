@@ -2,18 +2,18 @@ from graphene import Field, Int, List, Mutation, String
 
 from dummy_genome_database.models.genome import GenomeModel
 from dummy_genome_database.object_types.genome import Genome
+from dummy_genome_database.models.variant import VariantModel
 
 
 class CreateGenome(Mutation):
     class Arguments:
         genome_id = Int(required=True)
-        variants = List(Int)
 
     genome = Field(lambda: Genome)
 
     @staticmethod
-    def mutate(root, info, genome_id, variants=[]):
-        genome = GenomeModel(genome_id=genome_id, variants=variants)
+    def mutate(root, info, genome_id):
+        genome = GenomeModel(genome_id=genome_id)
         genome.save()
         return CreateGenome(genome=genome)
 
@@ -21,7 +21,7 @@ class CreateGenome(Mutation):
 class AddVariants(Mutation):
     class Arguments:
         genome_id = String(required=True)
-        variant_ids = List(Int)
+        variant_ids = List(String)
 
     genome = Field(lambda: Genome)
 
@@ -30,7 +30,8 @@ class AddVariants(Mutation):
         genome = GenomeModel.objects.get(id=genome_id)
 
         for variant_id in variant_ids:
-            genome.variants.append(variant_id)
+            variant = VariantModel.objects.get(id=variant_id)
+            genome.variants.append(variant)
 
         genome.save()
         return AddVariants(genome=genome)
