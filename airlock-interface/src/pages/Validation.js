@@ -115,6 +115,7 @@ class Validation extends Component {
           title={() => "Detailed results (Demo purposes)"}
           dataSource={this.state.userData.users}
           size="small"
+          rowKey="userId"
           pagination={false}
           columns={columns}
         />
