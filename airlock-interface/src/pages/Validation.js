@@ -28,7 +28,7 @@ class Validation extends Component {
     clientConsent
       .query({
         query: gql`{
-                users(consentOrg: ${this.props.location.state.orgType}, consentPurpose: ${this.props.location.state.purpose}, consentHpo: ${this.props.location.state.hpo}) {
+                users(consentOrg: ${this.props.location.state.orgType}, consentPurpose: ${this.props.location.state.purpose}, consentHpo: 1) {
                     userId
                     firstName
                     lastName
@@ -41,16 +41,19 @@ class Validation extends Component {
         clientGenome
           .query({
             query: gql`
-              query GenomeQuery($genomeIds: [Int], $variantId: Int) {
-                genomes(genomeIds: $genomeIds, variantId: $variantId) {
+              query GenomeQuery($genomeIds: [Int], $variantIds: [String]) {
+                genomes(genomeIds: $genomeIds, variantIds: $variantIds) {
                   genomeId
-                  variants
+                  variants {
+                    name
+                    hpoTerms
+                  }
                 }
               }
             `,
             variables: {
               genomeIds: genome_ids,
-              variantId: this.props.location.state.hpo
+              variantIds: this.props.location.state.hpo
             }
           })
           .then(resultGenome => {
@@ -81,6 +84,37 @@ class Validation extends Component {
   }
 
   render() {
+    const nested = record => {
+      const genomeId = record.userId ** 2;
+      const data = this.state.genomeData.genomes.filter(genome => {
+        return genome.genomeId === genomeId;
+      });
+      const variants = data[0] ? data[0].variants : [];
+      console.log(variants);
+      const columns = [
+        {
+          title: "Name",
+          key: "name",
+          dataIndex: "name"
+        },
+        {
+          title: "HPO terms",
+          key: "hpoTerms",
+          render: record => (
+            <div>
+              {record.hpoTerms.map(term => (
+                <div>{term}</div>
+              ))}
+            </div>
+          )
+        }
+      ];
+
+      return (
+        <Table columns={columns} dataSource={variants} pagination={false} />
+      );
+    };
+
     const columns = [
       {
         title: "First name",
@@ -99,6 +133,7 @@ class Validation extends Component {
       }
     ];
     if (this.state.loading) return <h1>Loading...</h1>;
+
     return (
       <Content style={{ padding: "0 50px" }}>
         <div style={{ padding: 24, minHeight: 280 }}>
@@ -118,6 +153,7 @@ class Validation extends Component {
           rowKey="userId"
           pagination={false}
           columns={columns}
+          expandedRowRender={nested}
         />
       </Content>
     );

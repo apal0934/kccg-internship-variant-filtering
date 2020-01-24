@@ -68,7 +68,7 @@ export class Researcher extends Component {
       if (!err) {
         console.log(values);
         this.setState({
-          completed: false,
+          completed: true,
           values: values
         });
       }
