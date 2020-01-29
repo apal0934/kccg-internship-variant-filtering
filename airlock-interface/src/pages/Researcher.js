@@ -44,7 +44,6 @@ export class Researcher extends Component {
   };
 
   onSelect = val => {
-    console.log(val);
     this.setState({
       value: val
     });
@@ -66,7 +65,6 @@ export class Researcher extends Component {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        console.log(values);
         this.setState({
           completed: true,
           values: values
@@ -88,7 +86,7 @@ export class Researcher extends Component {
       return (
         <Redirect
           to={{
-            pathname: "/validation",
+            pathname: "/research_validation",
             state: {
               orgType: this.state.values.orgType,
               hpo: this.state.values.hpo,

@@ -1,13 +1,11 @@
-import { Card, Layout, Table } from "antd";
 import React, { Component } from "react";
 
 import ApolloClient from "apollo-boost";
 import { InMemoryCache } from "apollo-boost";
+import { Redirect } from "react-router-dom";
 import gql from "graphql-tag";
 
-const { Content } = Layout;
-
-class Validation extends Component {
+class ResearchValidation extends Component {
   state = {
     userData: [],
     genomeData: [],
@@ -84,80 +82,20 @@ class Validation extends Component {
   }
 
   render() {
-    const nested = record => {
-      const genomeId = record.userId ** 2;
-      const data = this.state.genomeData.genomes.filter(genome => {
-        return genome.genomeId === genomeId;
-      });
-      const variants = data[0] ? data[0].variants : [];
-      console.log(variants);
-      const columns = [
-        {
-          title: "Name",
-          key: "name",
-          dataIndex: "name"
-        },
-        {
-          title: "HPO terms",
-          key: "hpoTerms",
-          render: record => (
-            <div>
-              {record.hpoTerms.map(term => (
-                <div>{term}</div>
-              ))}
-            </div>
-          )
-        }
-      ];
-
-      return (
-        <Table columns={columns} dataSource={variants} pagination={false} />
-      );
-    };
-
-    const columns = [
-      {
-        title: "First name",
-        key: "firstName",
-        dataIndex: "firstName"
-      },
-      {
-        title: "Last name",
-        key: "lastName",
-        dataIndex: "lastName"
-      },
-      {
-        title: "Email",
-        key: "email",
-        dataIndex: "email"
-      }
-    ];
     if (this.state.loading) return <h1>Loading...</h1>;
-
-    return (
-      <Content style={{ padding: "0 50px" }}>
-        <div style={{ padding: 24, minHeight: 280 }}>
-          <Card title="Query results">
-            We found <b>{Object.keys(this.state.userData.users).length}</b>{" "}
-            consenting samples. <br />
-            Of these, <b>
-              {Object.keys(this.state.genomeData.genomes).length}
-            </b>{" "}
-            have variants matching your query.
-          </Card>
-        </div>
-        <Table
-          title={() => "Detailed results (Demo purposes)"}
-          dataSource={this.state.userData.users}
-          size="small"
-          rowKey="userId"
-          pagination={false}
-          columns={columns}
-          expandedRowRender={nested}
+    else
+      return (
+        <Redirect
+          to={{
+            pathname: "/research_result",
+            state: {
+              userData: this.state.userData,
+              genomeData: this.state.genomeData
+            }
+          }}
         />
-      </Content>
-    );
+      );
   }
 }
 
-export default Validation;
+export default ResearchValidation;
