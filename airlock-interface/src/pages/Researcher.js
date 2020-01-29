@@ -160,15 +160,21 @@ export class Researcher extends Component {
                   ]
                 })(
                   <Select placeholder="Select purpose" style={{ width: 270 }}>
-                    <Option value="1">General research and clinical use</Option>
-                    <Option value="2">
+                    <Option value="DUO:0000005">
+                      General research and clinical use
+                    </Option>
+                    <Option value="DUO:0000006">
                       Health/Medical/Biomedical research
                     </Option>
-                    <Option value="3">Population and Ancestry research</Option>
+                    <Option value="DUO:0000007">
+                      Disease specific research
+                    </Option>
+                    <Option value="DUO:0000011">
+                      Population and Ancestry research
+                    </Option>
                   </Select>
                 )}
               </Form.Item>
-
               <FormItem wrapperCol={{ span: 14, offset: 4 }}>
                 <Button
                   type="primary"

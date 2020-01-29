@@ -26,7 +26,7 @@ class ResearchValidation extends Component {
     clientConsent
       .query({
         query: gql`{
-                users(consentOrg: ${this.props.location.state.orgType}, consentPurpose: ${this.props.location.state.purpose}, consentHpo: 1) {
+                users(consentOrg: ${this.props.location.state.orgType}, consentPurpose: "${this.props.location.state.purpose}", consentHpo: 1) {
                     userId
                     firstName
                     lastName
