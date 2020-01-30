@@ -1,3 +1,4 @@
+import { Icon, Spin } from "antd";
 import React, { Component } from "react";
 
 import ApolloClient from "apollo-boost";
@@ -97,7 +98,19 @@ class ResearchValidation extends Component {
   }
 
   render() {
-    if (this.state.loading) return <h1>Loading...</h1>;
+    const loading = (
+      <Icon
+        type="loading"
+        style={{
+          fontSize: "128px",
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          margin: "-64px 0 0 -64px"
+        }}
+      />
+    );
+    if (this.state.loading) return <Spin indicator={loading} />;
     else
       return (
         <Redirect
