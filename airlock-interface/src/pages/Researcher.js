@@ -1,4 +1,12 @@
-import { AutoComplete, Button, Card, Form, Layout, Select } from "antd";
+import {
+  AutoComplete,
+  Button,
+  Card,
+  Form,
+  Layout,
+  Select,
+  TreeSelect
+} from "antd";
 import React, { Component } from "react";
 
 import FormItem from "antd/lib/form/FormItem";
@@ -74,6 +82,40 @@ export class Researcher extends Component {
   };
 
   render() {
+    const treeData = [
+      {
+        title: "General research use [GRU]",
+        value: "DUO:0000042",
+        key: "DUO:0000042",
+        children: [
+          {
+            title: "General research use and clinical care",
+            value: "DUO:0000005",
+            key: "DUO:0000005",
+            children: [
+              {
+                title: "Health/Medical/Biomedial research [HMB]",
+                value: "DUO:0000006",
+                key: "DUO:0000006",
+                children: [
+                  {
+                    title: "Disease specific research [DS-XX]",
+                    value: "DUO:0000007",
+                    key: "DUO:0000007"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            title: "Population origins or ancestry research [POA]",
+            value: "DUO:0000011",
+            key: "DUO:0000011"
+          }
+        ]
+      }
+    ];
+
     const {
       getFieldDecorator,
       getFieldsError,
@@ -90,7 +132,9 @@ export class Researcher extends Component {
             state: {
               orgType: this.state.values.orgType,
               hpo: this.state.values.hpo,
-              purpose: this.state.values.purpose,
+              purpose: this.state.values.purpose.map(purpose => {
+                return purpose.value;
+              }),
               IP: this.props.IP
             }
           }}
@@ -159,20 +203,12 @@ export class Researcher extends Component {
                     }
                   ]
                 })(
-                  <Select placeholder="Select purpose" style={{ width: 270 }}>
-                    <Option value="DUO:0000005">
-                      General research and clinical use
-                    </Option>
-                    <Option value="DUO:0000006">
-                      Health/Medical/Biomedical research
-                    </Option>
-                    <Option value="DUO:0000007">
-                      Disease specific research
-                    </Option>
-                    <Option value="DUO:0000011">
-                      Population and Ancestry research
-                    </Option>
-                  </Select>
+                  <TreeSelect
+                    treeData={treeData}
+                    treeCheckable
+                    treeCheckStrictly
+                    treeDefaultExpandAll
+                  />
                 )}
               </Form.Item>
               <FormItem wrapperCol={{ span: 14, offset: 4 }}>

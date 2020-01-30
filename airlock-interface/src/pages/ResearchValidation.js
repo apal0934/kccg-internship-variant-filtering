@@ -25,14 +25,29 @@ class ResearchValidation extends Component {
     });
     clientConsent
       .query({
-        query: gql`{
-                users(consentOrg: ${this.props.location.state.orgType}, consentPurpose: "${this.props.location.state.purpose}", consentHpo: 1) {
-                    userId
-                    firstName
-                    lastName
-                    email
-                }
-            }`
+        query: gql`
+          query UserQuery(
+            $consentOrg: Int
+            $consentPurpose: [String]
+            $consentHpo: Int
+          ) {
+            users(
+              consentOrg: $consentOrg
+              consentPurpose: $consentPurpose
+              consentHpo: $consentHpo
+            ) {
+              userId
+              firstName
+              lastName
+              email
+            }
+          }
+        `,
+        variables: {
+          consentOrg: this.props.location.state.orgType,
+          consentPurpose: this.props.location.state.purpose,
+          consentHpo: 1
+        }
       })
       .then(resultConsent => {
         const genome_ids = this.mapUserToGenome(resultConsent.data.users);
