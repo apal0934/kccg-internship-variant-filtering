@@ -12,7 +12,6 @@ import {
 import React, { Component } from "react";
 
 import Fade from "react-reveal";
-import FormItem from "antd/lib/form/FormItem";
 import ResearchResult from "./ResearchResult";
 import ResearchValidation from "./ResearchValidation";
 
@@ -262,15 +261,19 @@ export class Researcher extends Component {
                     )}
                   </Form.Item>
                 </Fade>
-                <FormItem wrapperCol={{ span: 14, offset: 4 }}>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    disabled={hasErrors(getFieldsError())}
-                  >
-                    Next
-                  </Button>
-                </FormItem>
+                <Fade>
+                  <Form.Item wrapperCol={{ span: 14, offset: 4 }}>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      disabled={hasErrors(getFieldsError())}
+                    >
+                      Next (
+                      {Object.values(getFieldsError()).filter(v => !v).length}
+                      /3)
+                    </Button>
+                  </Form.Item>
+                </Fade>
               </Form>
             )}
           </Card>

@@ -9,8 +9,7 @@ class ResearchValidation extends Component {
   state = {
     userData: [],
     genomeData: [],
-    loading: true,
-    fromResearcher: true
+    loading: true
   };
 
   componentDidMount() {
