@@ -6,8 +6,6 @@ import Clinician from "./pages/Clinician";
 import Header from "./components/Header";
 import Landing from "./pages/Landing";
 import React from "react";
-import ResearchResult from "./pages/ResearchResult";
-import ResearchValidation from "./pages/ResearchValidation";
 import Researcher from "./pages/Researcher";
 
 function App() {
@@ -25,12 +23,6 @@ function App() {
             path="/researcher"
             render={() => <Researcher IP={IP} />}
           />
-          <Route
-            exact
-            path="/research_validation"
-            component={ResearchValidation}
-          />
-          <Route exact path="/research_result" component={ResearchResult} />
         </Switch>
       </Router>
     </div>

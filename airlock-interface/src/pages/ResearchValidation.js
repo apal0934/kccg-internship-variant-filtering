@@ -1,9 +1,8 @@
-import { Icon, Spin } from "antd";
 import React, { Component } from "react";
 
 import ApolloClient from "apollo-boost";
+import { Fragment } from "react";
 import { InMemoryCache } from "apollo-boost";
-import { Redirect } from "react-router-dom";
 import gql from "graphql-tag";
 
 class ResearchValidation extends Component {
@@ -18,11 +17,11 @@ class ResearchValidation extends Component {
     const cache = new InMemoryCache();
     const clientConsent = new ApolloClient({
       cache,
-      uri: `http://${this.props.location.state.IP}:8000`
+      uri: `http://${this.props.IP}:8000`
     });
     const clientGenome = new ApolloClient({
       cache,
-      uri: `http://${this.props.location.state.IP}:9000`
+      uri: `http://${this.props.IP}:9000`
     });
     clientConsent
       .query({
@@ -45,8 +44,10 @@ class ResearchValidation extends Component {
           }
         `,
         variables: {
-          consentOrg: this.props.location.state.orgType,
-          consentPurpose: this.props.location.state.purpose,
+          consentOrg: this.props.values.orgType,
+          consentPurpose: this.props.values.purpose.map(purpose => {
+            return purpose.value;
+          }),
           consentHpo: 1
         }
       })
@@ -67,7 +68,7 @@ class ResearchValidation extends Component {
             `,
             variables: {
               genomeIds: genome_ids,
-              variantIds: this.props.location.state.hpo
+              variantIds: this.props.values.hpo
             }
           })
           .then(resultGenome => {
@@ -85,6 +86,11 @@ class ResearchValidation extends Component {
         this.setState({
           loading: false
         });
+        this.props.validationCallback(
+          false,
+          this.state.userData,
+          this.state.genomeData
+        );
       }
     }
   }
@@ -98,31 +104,7 @@ class ResearchValidation extends Component {
   }
 
   render() {
-    const loading = (
-      <Icon
-        type="loading"
-        style={{
-          fontSize: "128px",
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          margin: "-64px 0 0 -64px"
-        }}
-      />
-    );
-    if (this.state.loading) return <Spin indicator={loading} />;
-    else
-      return (
-        <Redirect
-          to={{
-            pathname: "/research_result",
-            state: {
-              userData: this.state.userData,
-              genomeData: this.state.genomeData
-            }
-          }}
-        />
-      );
+    return <Fragment />;
   }
 }
 

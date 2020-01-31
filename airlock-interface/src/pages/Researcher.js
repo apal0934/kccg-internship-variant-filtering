@@ -3,32 +3,51 @@ import {
   Button,
   Card,
   Form,
+  Icon,
   Layout,
   Select,
+  Spin,
   TreeSelect
 } from "antd";
 import React, { Component } from "react";
 
+import Fade from "react-reveal";
 import FormItem from "antd/lib/form/FormItem";
-import { Redirect } from "react-router-dom";
+import ResearchResult from "./ResearchResult";
+import ResearchValidation from "./ResearchValidation";
 
 const { Option } = Select;
 const { Content } = Layout;
 const AutoCompleteOption = AutoComplete.Option;
+
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
 }
 
 export class Researcher extends Component {
   state = {
-    completed: false,
-    values: [],
-    value: "",
-    autocompleteData: []
+    formCompleted: false,
+    formValues: [],
+    autocompleteData: [],
+    tOrgType: false,
+    tHpo: false,
+    validating: false,
+    userData: [],
+    genomeData: []
   };
 
   componentDidMount() {
     this.props.form.validateFields();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props !== prevProps) {
+      if (this.props.form.isFieldTouched("orgType")) {
+        this.setState({
+          tOrgType: true
+        });
+      }
+    }
   }
 
   search(query) {
@@ -47,13 +66,21 @@ export class Researcher extends Component {
     xhr.send();
   }
 
+  validationCallback = (validating, userData, genomeData) => {
+    this.setState({
+      validating: validating,
+      userData: userData,
+      genomeData: genomeData
+    });
+  };
+
   onSearch = query => {
     this.search(query);
   };
 
   onSelect = val => {
     this.setState({
-      value: val
+      tHpo: true
     });
   };
 
@@ -74,14 +101,27 @@ export class Researcher extends Component {
     this.props.form.validateFields((err, values) => {
       if (!err) {
         this.setState({
-          completed: true,
-          values: values
+          formCompleted: true,
+          formValues: values,
+          validating: true
         });
       }
     });
   };
-
+  // TODO: Change redirect to direct components
   render() {
+    const loading = (
+      <Icon
+        type="loading"
+        style={{
+          fontSize: "64px",
+          position: "absolute",
+          left: "50%",
+          justifyContent: "center"
+        }}
+      />
+    );
+
     const treeData = [
       {
         title: "General research use [GRU]",
@@ -116,116 +156,129 @@ export class Researcher extends Component {
       }
     ];
 
-    const {
-      getFieldDecorator,
-      getFieldsError,
-      isFieldTouched
-    } = this.props.form;
+    const { getFieldDecorator, getFieldsError } = this.props.form;
     const data = this.state.autocompleteData.map(hp => (
       <AutoCompleteOption key={hp.obo_id}>{hp.label}</AutoCompleteOption>
     ));
-    if (this.state.completed) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/research_validation",
-            state: {
-              orgType: this.state.values.orgType,
-              hpo: this.state.values.hpo,
-              purpose: this.state.values.purpose.map(purpose => {
-                return purpose.value;
-              }),
-              IP: this.props.IP
-            }
-          }}
-        />
-      );
-    }
+
     return (
       <Content style={{ padding: "0 50px" }}>
         <div style={{ padding: 24, minHeight: 280 }}>
           <Card title="Researcher View">
-            <Form layout="horizontal" onSubmit={this.handleSubmit}>
-              <Form.Item
-                label="I am a..."
-                labelCol={{ span: 4 }}
-                wrapperCol={{ span: 14 }}
-                validateStatus={""}
-                help={""}
-              >
-                {getFieldDecorator("orgType", {
-                  rules: [
-                    {
-                      required: true
-                    }
-                  ]
-                })(
-                  <Select
-                    placeholder="Select organisation type"
-                    style={{ width: 250 }}
+            {this.state.formCompleted ? (
+              <div>
+                <ResearchValidation
+                  IP={this.props.IP}
+                  values={this.state.formValues}
+                  validationCallback={this.validationCallback}
+                />
+                {this.state.validating ? (
+                  <Spin indicator={loading} />
+                ) : (
+                  <Fade>
+                    <ResearchResult
+                      userData={this.state.userData}
+                      genomeData={this.state.genomeData}
+                    />
+                  </Fade>
+                )}
+              </div>
+            ) : (
+              <Form layout="horizontal" onSubmit={this.handleSubmit}>
+                <Fade>
+                  <Form.Item
+                    label="I am a..."
+                    labelCol={{ span: 4 }}
+                    wrapperCol={{ span: 14 }}
+                    validateStatus={""}
+                    help={""}
                   >
-                    <Option value="1">Not-for-profit research</Option>
-                    <Option value="2">University or research institute</Option>
-                    <Option value="3">Government</Option>
-                    <Option value="4">Commercial company</Option>
-                  </Select>
-                )}
-              </Form.Item>
-              <Form.Item
-                label="Looking at..."
-                labelCol={{ span: 4 }}
-                hidden={!isFieldTouched("orgType")}
-                wrapperCol={{ span: 14 }}
-                validateStatus={""}
-                help={""}
-              >
-                {getFieldDecorator("hpo", {
-                  rules: [
-                    {
-                      required: true
-                    }
-                  ]
-                })(<AutoComplete dataSource={data} onSearch={this.onSearch} />)}
-              </Form.Item>
+                    {getFieldDecorator("orgType", {
+                      rules: [
+                        {
+                          required: true
+                        }
+                      ]
+                    })(
+                      <Select
+                        placeholder="Select organisation type"
+                        style={{ width: 250 }}
+                      >
+                        <Option value="1">Not-for-profit research</Option>
+                        <Option value="2">
+                          University or research institute
+                        </Option>
+                        <Option value="3">Government</Option>
+                        <Option value="4">Commercial company</Option>
+                      </Select>
+                    )}
+                  </Form.Item>
+                </Fade>
+                <Fade when={this.state.tOrgType} collapse>
+                  <Form.Item
+                    label="Looking at..."
+                    labelCol={{ span: 4 }}
+                    wrapperCol={{ span: 14 }}
+                    validateStatus={""}
+                    help={""}
+                  >
+                    {getFieldDecorator("hpo", {
+                      rules: [
+                        {
+                          required: true
+                        }
+                      ]
+                    })(
+                      <AutoComplete
+                        onSelect={this.onSelect}
+                        dataSource={data}
+                        onSearch={this.onSearch}
+                      />
+                    )}
+                  </Form.Item>
+                </Fade>
 
-              <Form.Item
-                label="For..."
-                labelCol={{ span: 4 }}
-                wrapperCol={{ span: 14 }}
-                hidden={!isFieldTouched("hpo")}
-                validateStatus={""}
-                help={""}
-              >
-                {getFieldDecorator("purpose", {
-                  rules: [
-                    {
-                      required: true
-                    }
-                  ]
-                })(
-                  <TreeSelect
-                    treeData={treeData}
-                    treeCheckable
-                    treeCheckStrictly
-                    treeDefaultExpandAll
-                  />
-                )}
-              </Form.Item>
-              <FormItem wrapperCol={{ span: 14, offset: 4 }}>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  disabled={hasErrors(getFieldsError())}
-                >
-                  Next
-                </Button>
-              </FormItem>
-            </Form>
+                <Fade when={this.state.tHpo} collapse>
+                  <Form.Item
+                    label="For..."
+                    labelCol={{ span: 4 }}
+                    wrapperCol={{ span: 14 }}
+                    validateStatus={""}
+                    help={""}
+                  >
+                    {getFieldDecorator("purpose", {
+                      rules: [
+                        {
+                          required: true
+                        }
+                      ]
+                    })(
+                      <TreeSelect
+                        treeData={treeData}
+                        treeCheckable
+                        treeCheckStrictly
+                        treeDefaultExpandAll
+                      />
+                    )}
+                  </Form.Item>
+                </Fade>
+                <FormItem wrapperCol={{ span: 14, offset: 4 }}>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    disabled={hasErrors(getFieldsError())}
+                  >
+                    Next
+                  </Button>
+                </FormItem>
+              </Form>
+            )}
           </Card>
         </div>
       </Content>
     );
   }
 }
+
 const ResearcherForm = Form.create({ name: "researcher_form" })(Researcher);
 export default ResearcherForm;
