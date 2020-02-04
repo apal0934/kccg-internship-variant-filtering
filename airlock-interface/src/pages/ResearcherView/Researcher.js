@@ -1,3 +1,5 @@
+import * as loadingAnim from "../../animations/197-glow-loading.json";
+
 import {
   AutoComplete,
   Button,
@@ -12,6 +14,7 @@ import {
 import React, { Component } from "react";
 
 import Fade from "react-reveal";
+import Lottie from "react-lottie";
 import ResearchResult from "./ResearchResult";
 import ResearchValidation from "./ResearchValidation";
 
@@ -107,20 +110,8 @@ export class Researcher extends Component {
       }
     });
   };
-  // TODO: Change redirect to direct components
-  render() {
-    const loading = (
-      <Icon
-        type="loading"
-        style={{
-          fontSize: "64px",
-          position: "absolute",
-          left: "50%",
-          justifyContent: "center"
-        }}
-      />
-    );
 
+  render() {
     const treeData = [
       {
         title: "General research use [GRU]",
@@ -172,7 +163,11 @@ export class Researcher extends Component {
                   validationCallback={this.validationCallback}
                 />
                 {this.state.validating ? (
-                  <Spin indicator={loading} />
+                  <Lottie
+                    options={{ animationData: loadingAnim.default }}
+                    height={400}
+                    width={400}
+                  />
                 ) : (
                   <Fade>
                     <ResearchResult
