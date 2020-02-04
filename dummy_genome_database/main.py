@@ -26,7 +26,7 @@ class Query(graphene.ObjectType):
                         variants.append(variant)
 
             return list(GenomeModel.objects(variants__in=variants))
-        return list(GenomeModel.objects.all())
+        return []
 
     def resolve_genome(self, info, genome_id):
         return GenomeModel.objects.get(pk=genome_id)
