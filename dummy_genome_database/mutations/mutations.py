@@ -5,7 +5,7 @@ from dummy_genome_database.mutations.genome import (
     CreateGenome,
     DeleteGenome,
 )
-from dummy_genome_database.mutations.variant import CreateVariant, DeleteVariant
+from dummy_genome_database.mutations.variant import CreateVariant, UpdateVariant, DeleteVariant
 
 
 class Mutations(ObjectType):
@@ -14,4 +14,5 @@ class Mutations(ObjectType):
     add_variants = AddVariants.Field()
 
     create_variant = CreateVariant.Field()
+    update_variant = UpdateVariant.Field()
     delete_variant = DeleteVariant.Field()

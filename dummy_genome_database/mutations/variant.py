@@ -18,6 +18,20 @@ class CreateVariant(Mutation):
         return CreateVariant(variant=variant)
 
 
+class UpdateVariant(Mutation):
+    class Arguments:
+        variant_id = String(required=True)
+        name = String()
+
+    variant = Field(lambda: Variant)
+
+    def mutate(root, info, variant_id, name):
+        variant = VariantModel.objects.get(id=variant_id)
+        variant.name = name
+        variant.save()
+        return UpdateVariant(variant=variant)
+
+
 class DeleteVariant(Mutation):
     class Arguments:
         variant_id = String(required=True)
