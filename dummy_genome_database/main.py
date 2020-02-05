@@ -12,12 +12,12 @@ from dummy_genome_database.models.variant import VariantModel
 
 
 class Query(graphene.ObjectType):
-    genomes = graphene.List(Genome, genome_ids=graphene.List(graphene.Int), variant_ids=graphene.List(graphene.String))
+    genomes = graphene.List(Genome, genome_ids=graphene.List(graphene.Int), variant_ids=graphene.List(graphene.String), all=graphene.Boolean())
     genome = graphene.Field(Genome, genome_id=graphene.String())
 
     variants = graphene.List(Variant)
 
-    def resolve_genomes(self, info, genome_ids=None, variant_ids=None):
+    def resolve_genomes(self, info, genome_ids=None, variant_ids=None, all=False):
         if genome_ids and variant_ids:
             variants = []
             for genome in GenomeModel.objects(genome_id__in=genome_ids):
@@ -26,6 +26,8 @@ class Query(graphene.ObjectType):
                         variants.append(variant)
 
             return list(GenomeModel.objects(variants__in=variants))
+        if all:
+            return list(GenomeModel.objects.all())
         return []
 
     def resolve_genome(self, info, genome_id):
