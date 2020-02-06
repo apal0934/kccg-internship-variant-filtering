@@ -1,6 +1,7 @@
-import * as loadingAnim from "../../animations/782-check-mark-success.json";
+import * as authenticateAnim from "../../animations/782-check-mark-success.json";
+import * as loadingAnim from "../../animations/197-glow-loading.json";
 
-import { Button, Card, Form, Layout } from "antd";
+import { Button, Card, Descriptions, Form, Layout } from "antd";
 import React, { Component } from "react";
 
 import ClinicianValidation from "./ClinicianValidation";
@@ -46,9 +47,13 @@ export class Clinician extends Component {
   };
 
   render() {
-    const defaultOptions = {
-      animationData: loadingAnim.default,
+    const authAnimOptions = {
+      animationData: authenticateAnim.default,
       loop: false
+    };
+    const loadingAnimOptions = {
+      animationData: loadingAnim.default,
+      loop: true
     };
 
     var Element;
@@ -68,7 +73,7 @@ export class Clinician extends Component {
     if (this.state.isAuthenticating) {
       Element = (
         <Lottie
-          options={defaultOptions}
+          options={authAnimOptions}
           height={400}
           width={400}
           eventListeners={[
@@ -84,6 +89,7 @@ export class Clinician extends Component {
         />
       );
     }
+
     // Validate patient details and show results
     if (this.state.formCompleted) {
       Element = (
@@ -94,7 +100,27 @@ export class Clinician extends Component {
             values={this.state.formValues}
           />
           <div>
-            {this.state.validating ? "ree" : this.state.userData.user.firstName}
+            {this.state.validating ? (
+              <Lottie options={loadingAnimOptions} height={400} width={400} />
+            ) : (
+              <Descriptions title="Patient Info">
+                <Descriptions.Item label="First name">
+                  {this.state.userData.user.firstName}
+                </Descriptions.Item>
+                <Descriptions.Item label="Last name">
+                  {this.state.userData.user.lastName}
+                </Descriptions.Item>
+                <Descriptions.Item label="Date of birth">
+                  {this.state.userData.user.dateOfBirth.split("T")[0]}
+                </Descriptions.Item>
+                <Descriptions.Item label="Patient ID">
+                  {this.state.userData.user.userId}
+                </Descriptions.Item>
+                <Descriptions.Item label="Genome ID">
+                  {this.state.userData.user.userId ** 2}
+                </Descriptions.Item>
+              </Descriptions>
+            )}
           </div>
         </div>
       );

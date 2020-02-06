@@ -55,7 +55,7 @@ export default class ClinicianValidation extends Component {
         this.setState({
           loading: false
         });
-        this.props.validationCallback(false, this.state.userData);
+        this.props.validationCallback(this.state.userData);
       }
     }
   }
