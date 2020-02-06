@@ -9,7 +9,7 @@ class ResearchValidation extends Component {
   state = {
     userData: [],
     geneData: [],
-    loading: true
+    isLoading: true
   };
 
   componentDidMount() {
@@ -43,10 +43,12 @@ class ResearchValidation extends Component {
           }
         `,
         variables: {
-          consentOrg: this.props.stage1Values.orgType,
-          consentPurpose: this.props.stage1Values.purpose.map(purpose => {
-            return purpose.value;
-          }),
+          consentOrg: this.props.formIntentionValues.orgType,
+          consentPurpose: this.props.formIntentionValues.purpose.map(
+            purpose => {
+              return purpose.value;
+            }
+          ),
           consentHpo: 1
         }
       })
@@ -124,12 +126,20 @@ class ResearchValidation extends Component {
                   dis_max: {
                     queries: [
                       {
-                        match: { id: { query: this.props.stage2Values.genes } }
+                        match: {
+                          id: {
+                            query:
+                              this.props.formQueryValues.genes ||
+                              this.props.formQueryValues.region
+                          }
+                        }
                       },
                       {
                         match_phrase_prefix: {
                           symbol: {
-                            query: this.props.stage2Values.genes,
+                            query:
+                              this.props.formQueryValues.genes ||
+                              this.props.formQueryValues.region,
                             max_expansions: 20,
                             boost: 2
                           }
@@ -138,7 +148,9 @@ class ResearchValidation extends Component {
                       {
                         match: {
                           symbol: {
-                            query: this.props.stage2Values.genes,
+                            query:
+                              this.props.formQueryValues.genes ||
+                              this.props.formQueryValues.region,
                             fuzziness: 1,
                             boost: 2
                           }
@@ -147,7 +159,9 @@ class ResearchValidation extends Component {
                       {
                         match: {
                           description: {
-                            query: this.props.stage2Values.genes,
+                            query:
+                              this.props.formQueryValues.genes ||
+                              this.props.formQueryValues.region,
                             fuzziness: 1
                           }
                         }
@@ -164,15 +178,19 @@ class ResearchValidation extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state !== prevState && this.state.loading) {
+    if (this.state !== prevState && this.state.isLoading) {
       if (this.state.userData.users) {
-        this.setState({
-          loading: false
-        });
-        this.props.validationCallback(
-          false,
-          this.state.userData,
-          this.state.geneData
+        this.setState(
+          {
+            isLoading: false
+          },
+          () => {
+            this.props.validationCallback(
+              false,
+              this.state.userData,
+              this.state.geneData
+            );
+          }
         );
       }
     }

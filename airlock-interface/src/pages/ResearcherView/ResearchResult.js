@@ -1,26 +1,9 @@
-import { Card, Layout, Table } from "antd";
+import { Card, Layout } from "antd";
 import React, { Component } from "react";
 const { Content } = Layout;
 
 export default class ResearchResult extends Component {
   render() {
-    const columns = [
-      {
-        title: "First name",
-        key: "firstName",
-        dataIndex: "firstName"
-      },
-      {
-        title: "Last name",
-        key: "lastName",
-        dataIndex: "lastName"
-      },
-      {
-        title: "Email",
-        key: "email",
-        dataIndex: "email"
-      }
-    ];
     return (
       <Content style={{ padding: "0 50px" }}>
         <div style={{ padding: 24, minHeight: 280 }}>
