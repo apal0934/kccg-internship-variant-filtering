@@ -58,4 +58,5 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
 app.add_route("/", GraphQLApp(schema=graphene.Schema(query=Query, mutation=Mutations)))
