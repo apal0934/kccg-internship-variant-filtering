@@ -103,9 +103,19 @@ class ResearchValidation extends Component {
                 };
                 queryXhr.send(
                   JSON.stringify({
-                    chromosome: searchResult.hits.hits[0]._source.chromosome,
-                    positionStart: searchResult.hits.hits[0]._source.start,
-                    positionEnd: searchResult.hits.hits[0]._source.end,
+                    chromosome: searchResult.hits.hits[0]
+                      ? searchResult.hits.hits[0]._source.chromosome
+                      : this.props.formQueryValues.region.split(":")[0],
+                    positionStart: searchResult.hits.hits[0]
+                      ? searchResult.hits.hits[0]._source.start
+                      : this.props.formQueryValues.region
+                          .split(":")[1]
+                          .split("-")[0],
+                    positionEnd: searchResult.hits.hits[0]
+                      ? searchResult.hits.hits[0]._source.end
+                      : this.props.formQueryValues.region
+                          .split(":")[1]
+                          .split("-")[1],
                     limit: "10000",
                     skip: 0,
                     samples: resultGenome.data.usersToGenomes
@@ -128,18 +138,14 @@ class ResearchValidation extends Component {
                       {
                         match: {
                           id: {
-                            query:
-                              this.props.formQueryValues.genes ||
-                              this.props.formQueryValues.region
+                            query: this.props.formQueryValues.genes || ""
                           }
                         }
                       },
                       {
                         match_phrase_prefix: {
                           symbol: {
-                            query:
-                              this.props.formQueryValues.genes ||
-                              this.props.formQueryValues.region,
+                            query: this.props.formQueryValues.genes || "",
                             max_expansions: 20,
                             boost: 2
                           }
@@ -148,9 +154,7 @@ class ResearchValidation extends Component {
                       {
                         match: {
                           symbol: {
-                            query:
-                              this.props.formQueryValues.genes ||
-                              this.props.formQueryValues.region,
+                            query: this.props.formQueryValues.genes || "",
                             fuzziness: 1,
                             boost: 2
                           }
@@ -159,9 +163,7 @@ class ResearchValidation extends Component {
                       {
                         match: {
                           description: {
-                            query:
-                              this.props.formQueryValues.genes ||
-                              this.props.formQueryValues.region,
+                            query: this.props.formQueryValues.genes || "",
                             fuzziness: 1
                           }
                         }

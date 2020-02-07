@@ -8,7 +8,7 @@ import Fade from "react-reveal";
 import Lottie from "react-lottie";
 import ResearchIntentionForm from "./ResearcherIntentionForm";
 import ResearchResult from "./ResearchResult";
-import ResearchValidation from "./ResearchValidation";
+import ResearchValidation from "./ResearchQueryValidation";
 import ResearcherQueryForm from "./ResearcherQueryForm.js";
 
 const { Content } = Layout;
