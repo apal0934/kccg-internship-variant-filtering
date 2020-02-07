@@ -1,24 +1,34 @@
 import * as authenticateAnim from "../../animations/782-check-mark-success.json";
 import * as loadingAnim from "../../animations/197-glow-loading.json";
 
-import { Button, Card, Descriptions, Form, Layout } from "antd";
+import { Button, Card, Form, Layout } from "antd";
 import React, { Component } from "react";
 
-import ClinicianValidation from "./ClinicianValidation";
+import ClinicianQueryForm from "./ClinicianQueryForm.js";
+import ClinicianQueryValidation from "./ClinicianQueryValidation";
+import ClinicianResult from "./ClinicianResult.js";
 import Fade from "react-reveal";
 import Lottie from "react-lottie";
+import PatientConfirmationForm from "./PatientConfirmation.js";
 import PatientForm from "./PatientForm";
+import PatientValidation from "./PatientValidation";
 
 const { Content } = Layout;
 
 export class Clinician extends Component {
   state = {
-    formCompleted: false,
-    validating: false,
-    formValues: [],
+    patientFormCompleted: false,
+    queryFormCompleted: false,
+    isValidating: false,
+    patientFormValues: [],
+    queryFormValues: [],
     userData: [],
+    mappingData: [],
+    geneData: [],
     isAuthenticated: false,
-    isAuthenticating: false
+    isAuthenticating: false,
+    hasConfirmed: false,
+    validationCompleting: true
   };
 
   componentDidMount() {
@@ -31,18 +41,39 @@ export class Clinician extends Component {
     });
   };
 
-  formCallback = (formCompleted, formValues) => {
+  formCallback = (patientFormCompleted, patientFormValues) => {
     this.setState({
-      formCompleted: formCompleted,
-      formValues: formValues,
-      validating: true
+      patientFormCompleted: patientFormCompleted,
+      patientFormValues: patientFormValues,
+      isValidating: true
     });
   };
 
-  validationCallback = userData => {
+  patientValidationCallback = (userData, mappingData) => {
     this.setState({
       userData: userData,
-      validating: false
+      mappingData: mappingData,
+      isValidating: false
+    });
+  };
+
+  confimationCallback = hasConfirmed => {
+    this.setState({
+      hasConfirmed: hasConfirmed
+    });
+  };
+
+  queryCallback = (queryFormCompleted, queryFormValues) => {
+    this.setState({
+      queryFormCompleted: queryFormCompleted,
+      queryFormValues: queryFormValues
+    });
+  };
+
+  queryValidationCallback = (validationCompleting, geneData) => {
+    this.setState({
+      validationCompleting: validationCompleting,
+      geneData: geneData
     });
   };
 
@@ -58,9 +89,10 @@ export class Clinician extends Component {
 
     var Element;
     // Show form if "auth"ed and form not completed
-    if (this.state.isAuthenticated && !this.state.formCompleted) {
+    if (this.state.isAuthenticated && !this.state.patientFormCompleted) {
       Element = <PatientForm parentCallback={this.formCallback} />;
     }
+
     // Show auth button if not auth'd
     if (!this.state.isAuthenticated) {
       Element = (
@@ -69,6 +101,7 @@ export class Clinician extends Component {
         </Button>
       );
     }
+
     // Show animation while authing
     if (this.state.isAuthenticating) {
       Element = (
@@ -91,38 +124,52 @@ export class Clinician extends Component {
     }
 
     // Validate patient details and show results
-    if (this.state.formCompleted) {
+    if (this.state.patientFormCompleted) {
       Element = (
         <div>
-          <ClinicianValidation
+          <PatientValidation
             IP={this.props.IP}
-            validationCallback={this.validationCallback}
-            values={this.state.formValues}
+            parentCallback={this.patientValidationCallback}
+            values={this.state.patientFormValues}
           />
           <div>
-            {this.state.validating ? (
+            {this.state.isValidating ? (
               <Lottie options={loadingAnimOptions} height={400} width={400} />
             ) : (
-              <Descriptions title="Patient Info">
-                <Descriptions.Item label="First name">
-                  {this.state.userData.user.firstName}
-                </Descriptions.Item>
-                <Descriptions.Item label="Last name">
-                  {this.state.userData.user.lastName}
-                </Descriptions.Item>
-                <Descriptions.Item label="Date of birth">
-                  {this.state.userData.user.dateOfBirth.split("T")[0]}
-                </Descriptions.Item>
-                <Descriptions.Item label="Patient ID">
-                  {this.state.userData.user.userId}
-                </Descriptions.Item>
-                <Descriptions.Item label="Genome ID">
-                  {this.state.userData.user.userId ** 2}
-                </Descriptions.Item>
-              </Descriptions>
+              <PatientConfirmationForm
+                userData={this.state.userData}
+                mappingData={this.state.mappingData}
+                parentCallback={this.confimationCallback}
+              />
             )}
           </div>
         </div>
+      );
+    }
+
+    if (this.state.hasConfirmed && !this.state.queryFormCompleted) {
+      Element = <ClinicianQueryForm parentCallback={this.queryCallback} />;
+    }
+
+    if (this.state.queryFormCompleted) {
+      Element = (
+        <ClinicianQueryValidation
+          IP={this.props.IP}
+          formQueryValues={this.state.queryFormValues}
+          userData={this.state.userData}
+          mappingData={this.state.mappingData}
+          parentCallback={this.queryValidationCallback}
+        />
+      );
+    }
+
+    if (!this.state.validationCompleting) {
+      Element = (
+        <ClinicianResult
+          userData={this.state.userData}
+          geneData={this.state.geneData}
+          gene={this.state.queryFormValues.genes}
+        />
       );
     }
 

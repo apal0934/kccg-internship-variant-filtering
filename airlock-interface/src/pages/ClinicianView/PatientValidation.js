@@ -4,18 +4,19 @@ import ApolloClient from "apollo-boost";
 import { Fragment } from "react";
 import gql from "graphql-tag";
 
-export default class ClinicianValidation extends Component {
+export default class PatientValidation extends Component {
   state = {
     loading: true,
-    userData: []
+    userData: [],
+    mappingData: []
   };
 
   componentDidMount() {
     console.log(this.props.values.dateOfBirth);
-    const client = new ApolloClient({
+    const userClient = new ApolloClient({
       uri: `http://${this.props.IP}:8000`
     });
-    client
+    userClient
       .query({
         query: gql`
           query UserQuery(
@@ -42,10 +43,29 @@ export default class ClinicianValidation extends Component {
           dateOfBirth: this.props.values.dob._d.getTime()
         }
       })
-      .then(result => {
-        this.setState({
-          userData: result.data
+      .then(userResult => {
+        const mappingClient = new ApolloClient({
+          uri: `http://${this.props.IP}:7000`
         });
+        mappingClient
+          .query({
+            query: gql`
+              query mappingQuery($userId: Int) {
+                userToGenome(userId: $userId) {
+                  genomeId
+                }
+              }
+            `,
+            variables: {
+              userId: userResult.data.user.userId
+            }
+          })
+          .then(mappingResult => {
+            this.setState({
+              userData: userResult.data,
+              mappingData: mappingResult.data
+            });
+          });
       });
   }
 
@@ -55,7 +75,7 @@ export default class ClinicianValidation extends Component {
         this.setState({
           loading: false
         });
-        this.props.validationCallback(this.state.userData);
+        this.props.parentCallback(this.state.userData, this.state.mappingData);
       }
     }
   }
