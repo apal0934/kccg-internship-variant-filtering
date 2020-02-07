@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^7.2.1",
     "antd": "^3.26.7",
     "apollo-boost": "^0.4.7",
+    "axios": "^0.19.2",
     "eslint-plugin-import": "^2.20.0",
     "graphql": "^14.5.8",
     "lottie-react-web": "^2.1.4",
