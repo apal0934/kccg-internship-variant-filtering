@@ -6,16 +6,25 @@ import gql from "graphql-tag";
 
 export default class PatientValidation extends Component {
   state = {
-    loading: true,
+    isLoading: true,
     userData: [],
     mappingData: []
   };
 
   componentDidMount() {
-    console.log(this.props.values.dateOfBirth);
+    /* 
+      Instantiate ApolloClients for 
+      1. Dynamic Consent (8000)
+      2. GeneTrustee (7000)
+    */
     const userClient = new ApolloClient({
       uri: `http://${this.props.IP}:8000`
     });
+    const mappingClient = new ApolloClient({
+      uri: `http://${this.props.IP}:7000`
+    });
+
+    /* Select patient from details given */
     userClient
       .query({
         query: gql`
@@ -44,9 +53,7 @@ export default class PatientValidation extends Component {
         }
       })
       .then(userResult => {
-        const mappingClient = new ApolloClient({
-          uri: `http://${this.props.IP}:7000`
-        });
+        /* Retrieve their genomeID */
         mappingClient
           .query({
             query: gql`
@@ -70,10 +77,10 @@ export default class PatientValidation extends Component {
   }
 
   componentDidUpdate(prevState) {
-    if (this.state !== prevState && this.state.loading) {
+    if (this.state !== prevState && this.state.isLoading) {
       if (this.state.userData.user) {
         this.setState({
-          loading: false
+          isLoading: false
         });
         this.props.parentCallback(this.state.userData, this.state.mappingData);
       }

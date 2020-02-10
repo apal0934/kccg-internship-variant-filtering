@@ -12,6 +12,7 @@ class Patient extends Component {
       }
     });
   };
+
   render() {
     const { getFieldDecorator } = this.props.form;
 

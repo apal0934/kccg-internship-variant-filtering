@@ -20,15 +20,15 @@ export class Clinician extends Component {
     patientFormCompleted: false,
     queryFormCompleted: false,
     isValidating: false,
+    isAuthenticated: false,
+    isAuthenticating: false,
+    isConfirmed: false,
+    isValidationCompleting: true,
     patientFormValues: [],
     queryFormValues: [],
     userData: [],
     mappingData: [],
-    geneData: [],
-    isAuthenticated: false,
-    isAuthenticating: false,
-    hasConfirmed: false,
-    validationCompleting: true
+    geneData: []
   };
 
   componentDidMount() {
@@ -41,6 +41,7 @@ export class Clinician extends Component {
     });
   };
 
+  /* When patient details have been submitted */
   formCallback = (patientFormCompleted, patientFormValues) => {
     this.setState({
       patientFormCompleted: patientFormCompleted,
@@ -49,6 +50,7 @@ export class Clinician extends Component {
     });
   };
 
+  /* When validation of patient details is complete */
   patientValidationCallback = (userData, mappingData) => {
     this.setState({
       userData: userData,
@@ -57,12 +59,14 @@ export class Clinician extends Component {
     });
   };
 
-  confimationCallback = hasConfirmed => {
+  /* When clinician has confirmed patient details are correct */
+  confimationCallback = isConfirmed => {
     this.setState({
-      hasConfirmed: hasConfirmed
+      isConfirmed: isConfirmed
     });
   };
 
+  /* When the genomic query form has been submitted */
   queryCallback = (queryFormCompleted, queryFormValues) => {
     this.setState({
       queryFormCompleted: queryFormCompleted,
@@ -70,9 +74,10 @@ export class Clinician extends Component {
     });
   };
 
-  queryValidationCallback = (validationCompleting, geneData) => {
+  /* When the genomic query has returned with results */
+  queryValidationCallback = (isValidationCompleting, geneData) => {
     this.setState({
-      validationCompleting: validationCompleting,
+      isValidationCompleting: isValidationCompleting,
       geneData: geneData
     });
   };
@@ -147,7 +152,7 @@ export class Clinician extends Component {
       );
     }
 
-    if (this.state.hasConfirmed && !this.state.queryFormCompleted) {
+    if (this.state.isConfirmed && !this.state.queryFormCompleted) {
       Element = <ClinicianQueryForm parentCallback={this.queryCallback} />;
     }
 
@@ -163,7 +168,7 @@ export class Clinician extends Component {
       );
     }
 
-    if (!this.state.validationCompleting) {
+    if (!this.state.isValidationCompleting) {
       Element = (
         <ClinicianResult
           userData={this.state.userData}

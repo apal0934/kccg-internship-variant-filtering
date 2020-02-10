@@ -11,6 +11,7 @@ class ClinicianQuery extends Component {
     autocompleteData: []
   };
 
+  /* GET request to EBI for HPO autocomplete suggestions */
   search(query) {
     let url = `https://www.ebi.ac.uk/ols/api/select?ontology=hp&q=${query}`;
     let xhr = new XMLHttpRequest();
@@ -27,8 +28,12 @@ class ClinicianQuery extends Component {
     xhr.send();
   }
 
+  /* 
+  Don't spam them with requests
+  Only send on substantial strings, and every second letter
+  */
   onSearch = query => {
-    if (query.length >= 3) this.search(query);
+    if (query.length >= 3 && query.length % 2 === 0) this.search(query);
   };
 
   handleSubmit = e => {
