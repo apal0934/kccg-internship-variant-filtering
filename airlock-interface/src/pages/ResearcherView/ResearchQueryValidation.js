@@ -2,7 +2,6 @@ import React, { Component } from "react";
 
 import ApolloClient from "apollo-boost";
 import { Fragment } from "react";
-import { InMemoryCache } from "apollo-boost";
 import axios from "axios";
 import gql from "graphql-tag";
 
@@ -14,15 +13,18 @@ class ResearchValidation extends Component {
   };
 
   componentDidMount() {
-    const cache = new InMemoryCache();
+    /* 
+    Instantiate ApolloClients for 
+    1. Dynamic Consent (8000)
+    2. GeneTrustee (7000)
+    */
     const clientConsent = new ApolloClient({
-      cache,
       uri: `http://${this.props.IP}:8000`
     });
     const clientGenome = new ApolloClient({
-      cache,
       uri: `http://${this.props.IP}:7000`
     });
+    /* Select only the users that have consented to the researcher's purpose and orgType */
     clientConsent
       .query({
         query: gql`
@@ -54,6 +56,7 @@ class ResearchValidation extends Component {
         }
       })
       .then(resultConsent => {
+        /* Map those consenting users to their Genome (sample) IDs */
         clientGenome
           .query({
             query: gql`
@@ -71,6 +74,7 @@ class ResearchValidation extends Component {
             }
           })
           .then(resultGenome => {
+            /* Use KCCG's gene elasticsearch to translate gene names to genome positions */
             const url =
               "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
             const config = {
@@ -204,14 +208,6 @@ class ResearchValidation extends Component {
         );
       }
     }
-  }
-
-  mapUserToGenome(userIds) {
-    let genome_ids = [];
-    userIds.forEach(consent => {
-      genome_ids.push(consent.userId ** 2);
-    });
-    return genome_ids;
   }
 
   render() {

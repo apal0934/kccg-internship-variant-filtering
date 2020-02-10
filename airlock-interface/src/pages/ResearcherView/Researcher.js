@@ -19,13 +19,14 @@ export default class Researcher extends Component {
     isAuthenticating: false,
     isIntentionCompleted: false,
     isQueryCompleted: false,
+    isValidating: true,
     formIntentionValues: [],
     formQueryValues: [],
-    isValidating: true,
     userData: [],
     genomeData: []
   };
 
+  /* When query has come back with results */
   validationCallback = (isValidating, userData, geneData) => {
     this.setState({
       isValidating: isValidating,
@@ -34,6 +35,7 @@ export default class Researcher extends Component {
     });
   };
 
+  /* When form for research purpose has been submitted */
   intentionFormCallback = (isCompleted, formValues) => {
     this.setState({
       isIntentionCompleted: isCompleted,
@@ -41,6 +43,7 @@ export default class Researcher extends Component {
     });
   };
 
+  /* When form for query has been submitted */
   queryFormCallback = (isCompleted, formValues) => {
     this.setState({
       isQueryCompleted: isCompleted,
@@ -48,12 +51,7 @@ export default class Researcher extends Component {
     });
   };
 
-  onSelect = val => {
-    this.setState({
-      tPurpose: true
-    });
-  };
-
+  /* Placeholder auth */
   handleAuthentication = e => {
     this.setState({
       isAuthenticating: true
@@ -70,6 +68,7 @@ export default class Researcher extends Component {
       }
     };
 
+    /* Execute query and display results */
     const validationAndDisplay = (
       <div>
         <ResearchValidation
@@ -95,6 +94,7 @@ export default class Researcher extends Component {
       </div>
     );
 
+    /* Fake authentication button */
     const authButton = (
       <Button type="primary" onClick={this.handleAuthentication}>
         Authenticate

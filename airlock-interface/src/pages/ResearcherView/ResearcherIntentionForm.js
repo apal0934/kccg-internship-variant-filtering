@@ -19,6 +19,7 @@ class ResearcherIntention extends Component {
     this.props.form.validateFields();
   }
 
+  /* Show purpose field only when orgType is selected */
   componentDidUpdate(prevProps) {
     if (this.props !== prevProps) {
       if (this.props.form.isFieldTouched("orgType")) {
