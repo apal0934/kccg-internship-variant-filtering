@@ -1,10 +1,10 @@
-import { Button, Form, Select, TreeSelect } from "antd";
+import { AutoComplete, Button, Form, Select, TreeSelect } from "antd";
 import React, { Component } from "react";
 
 import Fade from "react-reveal";
 
 const { Option } = Select;
-
+const AutoCompleteOption = AutoComplete.Option;
 function hasErrors(fieldsError) {
   return Object.keys(fieldsError).some(field => fieldsError[field]);
 }
@@ -12,12 +12,36 @@ function hasErrors(fieldsError) {
 class ResearcherIntention extends Component {
   state = {
     tOrgType: false,
-    tPurpose: false
+    tPurpose: false,
+    tDSX: false,
+    autocompleteData: []
   };
 
   componentDidMount() {
     this.props.form.validateFields();
   }
+
+  search(query) {
+    console.log("AAAAAAAA");
+    const url = `https://api.monarchinitiative.org/api/search/entity/autocomplete/${query}?category=phenotype&prefix=HP&rows=5&start=0&minimal_tokenizer=false`;
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.responseType = "json";
+    xhr.onload = () => {
+      const status = xhr.status;
+      if (status === 200) {
+        this.setState({
+          autocompleteData: xhr.response.docs
+        });
+      }
+    };
+    xhr.send();
+  }
+
+  /* Don't spam them with requests, only send every second letter */
+  onSearch = query => {
+    if (query.length % 2 === 0) this.search(query);
+  };
 
   /* Show purpose field only when orgType is selected */
   componentDidUpdate(prevProps) {
@@ -30,13 +54,34 @@ class ResearcherIntention extends Component {
     }
   }
 
-  handleSubmit = e => {
-    e.preventDefault();
-    this.props.form.validateFields(["orgType", "purpose"], (err, values) => {
-      if (!err) {
-        this.props.parentCallback(true, values);
+  /* If DS-XX is chosen, show DS-XX input, else remove */
+  onChange = e => {
+    var dsx = false;
+    e.forEach(selection => {
+      if (selection.value === "DUO:0000007") {
+        dsx = true;
       }
     });
+    this.setState(
+      {
+        tDSX: dsx
+      },
+      () => {
+        this.props.form.validateFields(["dsx"], { force: true });
+      }
+    );
+  };
+
+  handleSubmit = e => {
+    e.preventDefault();
+    this.props.form.validateFields(
+      ["orgType", "purpose", "dsx"],
+      (err, values) => {
+        if (!err) {
+          this.props.parentCallback(true, values);
+        }
+      }
+    );
   };
 
   render() {
@@ -73,6 +118,12 @@ class ResearcherIntention extends Component {
         ]
       }
     ];
+
+    const data = this.state.autocompleteData.map(disease => (
+      <AutoCompleteOption key={disease.id}>
+        {disease.label[0]}
+      </AutoCompleteOption>
+    ));
 
     const { getFieldDecorator, getFieldsError } = this.props.form;
 
@@ -118,7 +169,25 @@ class ResearcherIntention extends Component {
                 treeCheckable
                 treeCheckStrictly
                 treeDefaultExpandAll
-                onSelect={this.onSelect}
+                onChange={this.onChange}
+              />
+            )}
+          </Form.Item>
+        </Fade>
+
+        <Fade when={this.state.tDSX} collapse>
+          <Form.Item label="The disease researched is...">
+            {getFieldDecorator("dsx", {
+              rules: [
+                {
+                  required: this.state.tDSX
+                }
+              ]
+            })(
+              <AutoComplete
+                dataSource={data}
+                onSearch={this.onSearch}
+                placeholder="Disease (required)"
               />
             )}
           </Form.Item>
@@ -129,15 +198,19 @@ class ResearcherIntention extends Component {
             <Button
               type="primary"
               htmlType="submit"
-              disabled={hasErrors(getFieldsError(["orgType", "purpose"]))}
+              disabled={hasErrors(
+                getFieldsError(["orgType", "purpose", "dsx"])
+              )}
             >
               Next (
               {
-                Object.values(getFieldsError(["orgType", "purpose"])).filter(
-                  v => !v
-                ).length
+                Object.values(
+                  this.state.tDSX
+                    ? getFieldsError(["orgType", "purpose", "dsx"])
+                    : getFieldsError(["orgType", "purpose"])
+                ).filter(v => !v).length
               }
-              /2)
+              /{this.state.tDSX ? 3 : 2})
             </Button>
           </Form.Item>
         </Fade>
