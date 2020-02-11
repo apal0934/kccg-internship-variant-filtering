@@ -22,7 +22,6 @@ class ResearcherIntention extends Component {
   }
 
   search(query) {
-    console.log("AAAAAAAA");
     const url = `https://api.monarchinitiative.org/api/search/entity/autocomplete/${query}?category=phenotype&prefix=HP&rows=5&start=0&minimal_tokenizer=false`;
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);

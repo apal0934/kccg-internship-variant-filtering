@@ -13,7 +13,7 @@ class ClinicianQuery extends Component {
 
   /* GET request to EBI for HPO autocomplete suggestions */
   search(query) {
-    let url = `https://www.ebi.ac.uk/ols/api/select?ontology=hp&q=${query}`;
+    let url = `https://api.monarchinitiative.org/api/search/entity/autocomplete/${query}?category=phenotype&prefix=HP&rows=5&start=0&minimal_tokenizer=false`;
     let xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
     xhr.responseType = "json";
@@ -21,7 +21,7 @@ class ClinicianQuery extends Component {
       let status = xhr.status;
       if (status === 200) {
         this.setState({
-          autocompleteData: xhr.response.response.docs
+          autocompleteData: xhr.response.docs
         });
       }
     };
