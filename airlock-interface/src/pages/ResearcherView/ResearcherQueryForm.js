@@ -52,7 +52,7 @@ class ResearcherQuery extends Component {
     const { getFieldDecorator, isFieldsTouched } = this.props.form;
 
     const data = this.state.autocompleteData.map(hp => (
-      <AutoCompleteOption key={hp.id}>{hp.highlight}</AutoCompleteOption>
+      <AutoCompleteOption key={hp.id}>{hp.label}</AutoCompleteOption>
     ));
 
     return (
