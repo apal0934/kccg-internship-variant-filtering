@@ -31,12 +31,12 @@ class ResearchValidation extends Component {
           query UserQuery(
             $consentOrg: Int
             $consentPurpose: [String]
-            $consentHpo: Int
+            $consentHpos: [String]
           ) {
             users(
               consentOrg: $consentOrg
               consentPurpose: $consentPurpose
-              consentHpo: $consentHpo
+              consentHpos: $consentHpos
             ) {
               userId
               firstName
@@ -52,7 +52,9 @@ class ResearchValidation extends Component {
               return purpose.value;
             }
           ),
-          consentHpo: 1
+          consentHpos: this.props.formIntentionValues.dsx
+            ? this.props.formIntentionValues.dsx
+            : null
         }
       })
       .then(resultConsent => {
@@ -180,10 +182,10 @@ class ResearchValidation extends Component {
                 dataset: "demo"
               });
 
-              axios.post(url, body, config).then(vairantResult => {
+              axios.post(url, body, config).then(variantResult => {
                 this.setState({
                   userData: resultConsent.data,
-                  geneData: vairantResult.data
+                  geneData: variantResult.data
                 });
               });
             });
