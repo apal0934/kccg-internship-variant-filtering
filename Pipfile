@@ -13,6 +13,7 @@ pre-commit = "*"
 fastapi = "*"
 uvicorn = "*"
 graphene-mongo = "*"
+pysam = "*"
 
 [requires]
 python_version = "3.7"
