@@ -1,7 +1,14 @@
 import * as loadingAnim from "../../animations/197-glow-loading.json";
 
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
-import { Card, Col, Layout, Row, Statistic } from "antd";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
+import { Card, Col, Layout, List, Row, Statistic } from "antd";
 import React, { Component } from "react";
 
 import Lottie from "react-lottie";
@@ -15,7 +22,9 @@ export default class ResearchResult extends Component {
     isLoading: true,
     clinvar: {},
     type: {},
-    consequence: {}
+    consequence: {},
+    pheno: [],
+    hpos: []
   };
 
   onTabChange = key => {
@@ -79,6 +88,7 @@ export default class ResearchResult extends Component {
     var clinvarData = [];
     var typeData = [];
     var consequenceData = [];
+
     Object.keys(clinvar).forEach(key => {
       if (key !== "null") clinvarData.push({ name: key, value: clinvar[key] });
     });
@@ -86,13 +96,13 @@ export default class ResearchResult extends Component {
       if (key !== "null") typeData.push({ name: key, value: type[key] });
     });
     Object.keys(consequence).forEach(key => {
-      if (key !== "null")
+      if (key !== "null" && consequence[key] >= 20)
         consequenceData.push({
           name: key,
           value: consequence[key]
         });
     });
-    console.log(clinvarData);
+
     this.setState(
       {
         clinvar: clinvarData.sort(this.sort),
@@ -100,11 +110,68 @@ export default class ResearchResult extends Component {
         consequence: consequenceData.sort(this.sort)
       },
       () => {
-        this.setState({
-          isLoading: false
+        const url = "https://vsal.garvan.org.au/vsal/core/find";
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer fakeTokenForDemo"
+          }
+        };
+        const body = JSON.stringify({
+          pheno: true,
+          chromosome: 1,
+          positionStart: 1,
+          positionEnd: 1,
+          dataset: "demo"
+        });
+
+        axios.post(url, body, config).then(phenoRes => {
+          var pheno = JSON.parse(phenoRes.data.pheno).filter(a => {
+            var found = false;
+            this.props.geneData.coreQuery.samples.forEach(sample => {
+              if (sample === a.internalIDs) {
+                found = true;
+              }
+            });
+            return found;
+          });
+
+          var hpos = {};
+          var hpoData = [];
+          pheno.forEach(phenotype => {
+            hpos[phenotype["Low Coverage Center"]] =
+              (hpos[phenotype["Low Coverage Center"]] || 0) + 1;
+            hpos[phenotype["Relationship"]] =
+              (hpos[phenotype["Relationship"]] || 0) + 1;
+          });
+
+          Object.keys(hpos).forEach(key => {
+            if (key !== "null")
+              hpoData.push({ name: this.genHPO(), value: hpos[key] });
+          });
+
+          console.log(hpos);
+          this.setState(
+            {
+              hpos: hpoData.sort(this.sort),
+              pheno: pheno
+            },
+            () => {
+              this.setState({
+                isLoading: false
+              });
+            }
+          );
         });
       }
     );
+  }
+
+  genHPO() {
+    var num = Math.floor(Math.random() * 10000);
+    var s = num + "";
+    while (s.length < 7) s = "0" + s;
+    return "HP:" + s;
   }
 
   renderLabel = entry => {
@@ -128,6 +195,10 @@ export default class ResearchResult extends Component {
       {
         key: "tab4",
         tab: "Consequence"
+      },
+      {
+        key: "tab5",
+        tab: "Phenotypes"
       }
     ];
 
@@ -155,6 +226,7 @@ export default class ResearchResult extends Component {
         <ResponsiveContainer width={"99%"} height={300}>
           <BarChart data={this.state.clinvar} label={this.renderLabel}>
             <XAxis dataKey="name" />
+            <YAxis />
             <Tooltip />
             <Bar dataKey="value" fill="#8884d8" />
           </BarChart>
@@ -164,6 +236,7 @@ export default class ResearchResult extends Component {
         <ResponsiveContainer width={"99%"} height={300}>
           <BarChart data={this.state.type} label={this.renderLabel}>
             <XAxis dataKey="name" />
+            <YAxis />
             <Tooltip />
             <Bar dataKey="value" fill="#8884d8" />
           </BarChart>
@@ -172,13 +245,26 @@ export default class ResearchResult extends Component {
       tab4: (
         <ResponsiveContainer width={"99%"} height={300}>
           <BarChart data={this.state.consequence} label={this.renderLabel}>
-            <XAxis dataKey="name" tick={false} />
+            <XAxis dataKey="name"></XAxis>
+            <YAxis />
             <Tooltip />
             <Bar dataKey="value" fill="#8884d8" />
           </BarChart>
         </ResponsiveContainer>
+      ),
+      tab5: (
+        <List
+          itemLayout="horizontal"
+          dataSource={this.state.hpos}
+          renderItem={item => (
+            <List.Item>
+              <List.Item.Meta description={`${item.name} - ${item.value}`} />
+            </List.Item>
+          )}
+        />
       )
     };
+
     const loading = (
       <Lottie
         options={{ animationData: loadingAnim.default, loop: true }}
