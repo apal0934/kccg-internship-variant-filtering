@@ -98,7 +98,7 @@ class ResearchValidation extends Component {
                       match: {
                         symbol: {
                           query: this.props.formQueryValues.genes || "",
-                          fuzziness: 1,
+                          fuzziness: 0,
                           boost: 4
                         }
                       }
