@@ -124,7 +124,7 @@ class ClinicianQuery extends Component {
         <Fade>
           <Row>
             <Col span={24}>
-              <Form.Item label="In patients with..." help={""}>
+              <Form.Item label="Patient has phenotype..." help={""}>
                 {getFieldDecorator("hpo")(
                   <AutoComplete
                     dataSource={data}
