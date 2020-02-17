@@ -19,11 +19,11 @@ export class Clinician extends Component {
   state = {
     patientFormCompleted: false,
     queryFormCompleted: false,
-    isValidating: false,
+    isValidatingPatient: false,
     isAuthenticated: false,
     isAuthenticating: false,
     isConfirmed: false,
-    isValidationCompleting: true,
+    isValidatingQuery: true,
     patientFormValues: [],
     queryFormValues: [],
     userData: [],
@@ -46,7 +46,7 @@ export class Clinician extends Component {
     this.setState({
       patientFormCompleted: patientFormCompleted,
       patientFormValues: patientFormValues,
-      isValidating: true
+      isValidatingPatient: true
     });
   };
 
@@ -55,7 +55,7 @@ export class Clinician extends Component {
     this.setState({
       userData: userData,
       mappingData: mappingData,
-      isValidating: false
+      isValidatingPatient: false
     });
   };
 
@@ -75,9 +75,9 @@ export class Clinician extends Component {
   };
 
   /* When the genomic query has returned with results */
-  queryValidationCallback = (isValidationCompleting, geneData) => {
+  queryValidationCallback = (isValidatingQuery, geneData) => {
     this.setState({
-      isValidationCompleting: isValidationCompleting,
+      isValidatingQuery: isValidatingQuery,
       geneData: geneData
     });
   };
@@ -138,7 +138,7 @@ export class Clinician extends Component {
             values={this.state.patientFormValues}
           />
           <div>
-            {this.state.isValidating ? (
+            {this.state.isValidatingPatient ? (
               <Lottie options={loadingAnimOptions} height={400} width={400} />
             ) : (
               <PatientConfirmationForm
@@ -158,17 +158,20 @@ export class Clinician extends Component {
 
     if (this.state.queryFormCompleted) {
       Element = (
-        <ClinicianQueryValidation
-          IP={this.props.IP}
-          formQueryValues={this.state.queryFormValues}
-          userData={this.state.userData}
-          mappingData={this.state.mappingData}
-          parentCallback={this.queryValidationCallback}
-        />
+        <div>
+          <ClinicianQueryValidation
+            IP={this.props.IP}
+            formQueryValues={this.state.queryFormValues}
+            userData={this.state.userData}
+            mappingData={this.state.mappingData}
+            parentCallback={this.queryValidationCallback}
+          />
+          <Lottie options={loadingAnimOptions} height={400} width={400} />
+        </div>
       );
     }
 
-    if (!this.state.isValidationCompleting) {
+    if (!this.state.isValidatingQuery) {
       Element = (
         <ClinicianResult
           userData={this.state.userData}
