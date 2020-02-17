@@ -2,13 +2,15 @@ import { AutoComplete, Button, Card, Col, Form, Input, Row } from "antd";
 import React, { Component } from "react";
 
 import Fade from "react-reveal";
+import axios from "axios";
 
 const { TextArea } = Input;
 const AutoCompleteOption = AutoComplete.Option;
 
 class ClinicianQuery extends Component {
   state = {
-    autocompleteData: []
+    autocompleteData: [],
+    hpoGenes: []
   };
 
   /* GET request to EBI for HPO autocomplete suggestions */
@@ -34,6 +36,61 @@ class ClinicianQuery extends Component {
   */
   onSearch = query => {
     if (query.length >= 3 && query.length % 2 === 0) this.search(query);
+  };
+
+  onSelect = query => {
+    let url = `https://api.monarchinitiative.org/api/bioentity/phenotype/${query}/genes?rows=100&facet=false&unselect_evidence=false&exclude_automatic_assertions=false&fetch_objects=false&use_compact_associations=true&direct=false&direct_taxon=false`;
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.responseType = "json";
+    xhr.onload = () => {
+      let status = xhr.status;
+      if (status === 200) {
+        /* Use KCCG's gene elasticsearch to translate gene names to genome positions */
+        const url = "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
+        const config = {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        };
+
+        var genes = xhr.response.compact_associations[0].objects.map(gene => {
+          return gene.substring(5);
+        });
+        const numGenes = genes.length;
+        const body = JSON.stringify({
+          from: 0,
+          size: numGenes,
+          query: {
+            dis_max: {
+              queries: [
+                {
+                  match: {
+                    description: {
+                      query: genes.join(" "),
+                      fuzziness: 1,
+                      boost: 4
+                    }
+                  }
+                }
+              ],
+              tie_breaker: 0.4
+            }
+          },
+          sort: [{ _score: { order: "desc" } }]
+        });
+
+        axios.post(url, body, config).then(res => {
+          this.props.form.setFieldsValue({
+            genes: res.data.hits.hits.map(gene => {
+              return gene._source.symbol;
+            }).join(`
+`)
+          });
+        });
+      }
+    };
+    xhr.send();
   };
 
   handleSubmit = e => {
@@ -109,7 +166,9 @@ class ClinicianQuery extends Component {
                   <AutoComplete
                     dataSource={data}
                     onSearch={this.onSearch}
+                    onSelect={query => this.onSelect(query)}
                     placeholder={"HPO (optional)"}
+                    backfill
                   />
                 )}
               </Form.Item>
