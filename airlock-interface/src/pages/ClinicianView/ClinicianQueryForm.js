@@ -1,4 +1,14 @@
-import { AutoComplete, Button, Card, Col, Form, Input, Row } from "antd";
+import {
+  AutoComplete,
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Radio,
+  Row,
+  Slider
+} from "antd";
 import React, { Component } from "react";
 
 import Fade from "react-reveal";
@@ -95,14 +105,11 @@ class ClinicianQuery extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
-    this.props.form.validateFields(
-      ["variants", "genes", "region", "hpo"],
-      (err, values) => {
-        if (!err) {
-          this.props.parentCallback(true, values);
-        }
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        this.props.parentCallback(true, values);
       }
-    );
+    });
   };
 
   render() {
@@ -114,6 +121,24 @@ class ClinicianQuery extends Component {
 
     return (
       <Form layout="horizontal" onSubmit={this.handleSubmit}>
+        <Fade>
+          <Row>
+            <Col span={24}>
+              <Form.Item label="In patients with..." help={""}>
+                {getFieldDecorator("hpo")(
+                  <AutoComplete
+                    dataSource={data}
+                    onSearch={this.onSearch}
+                    onSelect={query => this.onSelect(query)}
+                    placeholder={"HPO (optional)"}
+                    backfill
+                  />
+                )}
+              </Form.Item>
+            </Col>
+          </Row>
+        </Fade>
+
         <Fade>
           <div>
             <Row>
@@ -159,21 +184,35 @@ class ClinicianQuery extends Component {
         </Fade>
 
         <Fade>
-          <Row>
-            <Col span={24}>
-              <Form.Item label="In patients with..." help={""}>
-                {getFieldDecorator("hpo")(
-                  <AutoComplete
-                    dataSource={data}
-                    onSearch={this.onSearch}
-                    onSelect={query => this.onSelect(query)}
-                    placeholder={"HPO (optional)"}
-                    backfill
-                  />
-                )}
-              </Form.Item>
-            </Col>
-          </Row>
+          <Form.Item>
+            <h4>Allele Frequency</h4>
+            {getFieldDecorator("alleleFreq", {
+              initialValue: 1
+            })(
+              <Slider
+                step={0.1}
+                max={10}
+                tipFormatter={value => {
+                  return `${value}%`;
+                }}
+              />
+            )}
+          </Form.Item>
+        </Fade>
+
+        <Fade>
+          <Form.Item>
+            <h4>Variant Type</h4>
+            {getFieldDecorator("variantType", {
+              initialValue: "both"
+            })(
+              <Radio.Group>
+                <Radio.Button value="snp">SNP</Radio.Button>
+                <Radio.Button value="indel">Indel</Radio.Button>
+                <Radio.Button value="both">Both</Radio.Button>
+              </Radio.Group>
+            )}
+          </Form.Item>
         </Fade>
 
         <Fade>

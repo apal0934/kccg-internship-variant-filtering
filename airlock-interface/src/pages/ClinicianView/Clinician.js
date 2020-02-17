@@ -176,7 +176,7 @@ export class Clinician extends Component {
         <ClinicianResult
           userData={this.state.userData}
           geneData={this.state.geneData}
-          gene={this.state.queryFormValues.genes}
+          form={this.state.queryFormValues}
         />
       );
     }
