@@ -217,6 +217,21 @@ class ClinicianQuery extends Component {
 
         <Fade>
           <Form.Item>
+            <h4>Variant Type</h4>
+            {getFieldDecorator("impact", {
+              initialValue: "all"
+            })(
+              <Radio.Group>
+                <Radio.Button value="high">High</Radio.Button>
+                <Radio.Button value="highmed">High & Med</Radio.Button>
+                <Radio.Button value="all">All</Radio.Button>
+              </Radio.Group>
+            )}
+          </Form.Item>
+        </Fade>
+
+        <Fade>
+          <Form.Item>
             <Button
               type="primary"
               htmlType="submit"
