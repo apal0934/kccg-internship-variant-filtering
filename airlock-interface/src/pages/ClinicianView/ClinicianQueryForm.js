@@ -20,7 +20,8 @@ const AutoCompleteOption = AutoComplete.Option;
 class ClinicianQuery extends Component {
   state = {
     autocompleteData: [],
-    hpoGenes: []
+    hpoGenes: [],
+    custom: false
   };
 
   /* GET request to EBI for HPO autocomplete suggestions */
@@ -101,6 +102,38 @@ class ClinicianQuery extends Component {
       }
     };
     xhr.send();
+  };
+
+  onChange = e => {
+    switch (e.target.value) {
+      case "default":
+        this.props.form.setFieldsValue({
+          alleleFreq: 2,
+          impact: "highmed",
+          cadd: 24
+        });
+        this.setState({
+          custom: false
+        });
+        break;
+      case "rachel":
+        this.props.form.setFieldsValue({
+          alleleFreq: 1.5,
+          impact: "high",
+          cadd: 20
+        });
+        this.setState({
+          custom: false
+        });
+        break;
+      case "custom":
+        this.setState({
+          custom: true
+        });
+        break;
+      default:
+        console.log(":(");
+    }
   };
 
   handleSubmit = e => {
@@ -184,18 +217,77 @@ class ClinicianQuery extends Component {
         </Fade>
 
         <Fade>
+          <h3>Bucket Settings</h3>
+          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+            <Form.Item>
+              {getFieldDecorator("settings", {
+                initialValue: "default"
+              })(
+                <Radio.Group
+                  buttonStyle="solid"
+                  size="large"
+                  onChange={this.onChange}
+                  style={{ display: "block" }}
+                >
+                  <Col span={8} className="gutter-row">
+                    <Radio.Button value="default" style={{ display: "block" }}>
+                      Recommended Orrery
+                    </Radio.Button>
+                  </Col>
+                  <Col span={8} className="gutter-row">
+                    <Radio.Button value="rachel" style={{ display: "block" }}>
+                      Rachel's Settings
+                    </Radio.Button>
+                  </Col>
+                  <Col span={8} className="gutter-row">
+                    <Radio.Button value="custom" style={{ display: "block" }}>
+                      Custom
+                    </Radio.Button>
+                  </Col>
+                </Radio.Group>
+              )}
+            </Form.Item>
+          </Row>
+        </Fade>
+
+        <Fade>
           <Form.Item>
             <h4>Allele Frequency</h4>
             {getFieldDecorator("alleleFreq", {
-              initialValue: 1
+              initialValue: 2
             })(
               <Slider
+                disabled={!this.state.custom}
                 step={0.1}
                 max={10}
                 tipFormatter={value => {
                   return `${value}%`;
                 }}
               />
+            )}
+          </Form.Item>
+        </Fade>
+
+        <Fade>
+          <Form.Item>
+            <h4>Minimum CADD Score</h4>
+            {getFieldDecorator("cadd", {
+              initialValue: 24
+            })(<Slider disabled={!this.state.custom} step={1} max={30} />)}
+          </Form.Item>
+        </Fade>
+
+        <Fade>
+          <Form.Item>
+            <h4>Variant Type</h4>
+            {getFieldDecorator("impact", {
+              initialValue: "highmed"
+            })(
+              <Radio.Group disabled={!this.state.custom}>
+                <Radio.Button value="high">High</Radio.Button>
+                <Radio.Button value="highmed">High & Med</Radio.Button>
+                <Radio.Button value="all">All</Radio.Button>
+              </Radio.Group>
             )}
           </Form.Item>
         </Fade>
@@ -210,21 +302,6 @@ class ClinicianQuery extends Component {
                 <Radio.Button value="snp">SNP</Radio.Button>
                 <Radio.Button value="indel">Indel</Radio.Button>
                 <Radio.Button value="both">Both</Radio.Button>
-              </Radio.Group>
-            )}
-          </Form.Item>
-        </Fade>
-
-        <Fade>
-          <Form.Item>
-            <h4>Variant Type</h4>
-            {getFieldDecorator("impact", {
-              initialValue: "all"
-            })(
-              <Radio.Group>
-                <Radio.Button value="high">High</Radio.Button>
-                <Radio.Button value="highmed">High & Med</Radio.Button>
-                <Radio.Button value="all">All</Radio.Button>
               </Radio.Group>
             )}
           </Form.Item>
