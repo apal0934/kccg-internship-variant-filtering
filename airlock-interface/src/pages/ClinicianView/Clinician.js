@@ -148,7 +148,9 @@ export class Clinician extends Component {
               />
             ) : (
               <div>
-                <h1>:c</h1>
+                <h1>
+                  <b>:c</b>
+                </h1>
                 <h3>We couldn't find that patient</h3>
               </div>
             )}
