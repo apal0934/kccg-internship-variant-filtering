@@ -87,6 +87,8 @@ function annotate(geneData, aggregate) {
           ) {
             sampleVariant["impact"] = impactEnum[globalVariant.consequences];
             sampleVariant["clinvar"] = globalVariant.clinvar;
+            sampleVariant["gene"] = globalVariant.geneSymbol;
+
             if (aggregate) {
               clinvar[globalVariant.clinvar] =
                 (clinvar[globalVariant.clinvar] || 0) + 1;
