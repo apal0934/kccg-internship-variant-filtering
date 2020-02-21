@@ -140,12 +140,17 @@ export class Clinician extends Component {
           <div>
             {this.state.isValidatingPatient ? (
               <Lottie options={loadingAnimOptions} height={400} width={400} />
-            ) : (
+            ) : this.state.userData ? (
               <PatientConfirmationForm
                 userData={this.state.userData}
                 mappingData={this.state.mappingData}
                 parentCallback={this.confimationCallback}
               />
+            ) : (
+              <div>
+                <h1>:c</h1>
+                <h3>We couldn't find that patient</h3>
+              </div>
             )}
           </div>
         </div>
