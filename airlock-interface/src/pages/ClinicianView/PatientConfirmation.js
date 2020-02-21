@@ -10,10 +10,9 @@ class PatientConfirmation extends Component {
       }
     });
   };
-  componentDidMount() {}
+
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
-    console.log(this.props.userData);
 
     return (
       <div>

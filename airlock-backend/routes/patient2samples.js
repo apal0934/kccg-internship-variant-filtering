@@ -38,7 +38,6 @@ function patient2samples(firstName, lastName, dateOfBirth) {
     case 200:
       var data = {};
       data["user"] = JSON.parse(request.responseText).data.user;
-      console.log(JSON.parse(request.responseText));
       url = "http://localhost:7000";
       body = JSON.stringify({
         query: `
@@ -78,7 +77,6 @@ function patient2samples(firstName, lastName, dateOfBirth) {
    :param int dateOfBirth: the getTime of a date object
 */
 router.post("/", function(req, res, next) {
-  console.log(req.body);
   res.send(
     patient2samples(req.body.firstName, req.body.lastName, req.body.dateOfBirth)
   );

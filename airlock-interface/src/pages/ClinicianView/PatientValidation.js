@@ -13,7 +13,6 @@ export default class PatientValidation extends Component {
     };
 
     axios.post(url, body).then(res => {
-      console.log(res);
       if (!res.data.error) {
         this.props.parentCallback(res.data.user, res.data.mapping);
       } else {
