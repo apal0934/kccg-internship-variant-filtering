@@ -1,6 +1,8 @@
 import { Card, Col, Layout, Row, Statistic, Table } from "antd";
 import React, { Component } from "react";
 
+import { CSVLink } from "react-csv";
+
 const { Content } = Layout;
 
 export default class ClinicianResult extends Component {
@@ -14,6 +16,8 @@ export default class ClinicianResult extends Component {
     });
   };
 
+  onClick = () => {};
+
   render() {
     const tabList = [
       {
@@ -23,10 +27,6 @@ export default class ClinicianResult extends Component {
       {
         key: "tab2",
         tab: "Overview"
-      },
-      {
-        key: "tab3",
-        tab: "Variants"
       }
     ];
 
@@ -42,12 +42,22 @@ export default class ClinicianResult extends Component {
       {
         title: "Gene",
         key: "gene",
-        render: record => <div>Placeholder</div>
+        dataIndex: "gene"
       },
       {
         title: "Type",
         key: "type",
         dataIndex: "t"
+      },
+      {
+        title: "Allele Freq",
+        key: "alleleFreq",
+        render: record => <div>{`${(record.af * 100).toFixed(2)}%`}</div>
+      },
+      {
+        title: "HomZ/HetZ",
+        key: "homhet",
+        render: record => <div>{`${record.homc}/${record.hetc}`}</div>
       },
       {
         title: "Impact",
@@ -107,23 +117,14 @@ export default class ClinicianResult extends Component {
           </Col>
           <Col span={8}>
             <Statistic
-              title="Reduction"
-              value={`${(1 -
-                (
-                  this.props.geneData[this.props.geneData.length - 1].filtered /
-                  this.props.geneData[this.props.geneData.length - 1].initial
-                ).toFixed(2)) *
-                100}%`}
+              title="Reduction by a factor of"
+              value={Math.round(
+                this.props.geneData[this.props.geneData.length - 1].initial /
+                  this.props.geneData[this.props.geneData.length - 1].filtered
+              )}
             />
           </Col>
         </Row>
-      ),
-      tab3: (
-        <Table
-          dataSource={this.props.geneData.slice(0, -1)}
-          columns={columns}
-          rowKey="s"
-        />
       )
     };
 
@@ -142,6 +143,20 @@ export default class ClinicianResult extends Component {
               return contentList[this.state.key];
             })()}
           </Card>
+          <div style={{ paddingTop: 24 }}>
+            <Table
+              dataSource={this.props.geneData.slice(0, -1)}
+              columns={columns}
+              rowKey="s"
+              title={() => "Variants"}
+              footer={() => (
+                <CSVLink data={this.props.geneData.slice(0, -1)}>
+                  Export CSV
+                </CSVLink>
+              )}
+              bordered
+            />
+          </div>
         </div>
       </Content>
     );
