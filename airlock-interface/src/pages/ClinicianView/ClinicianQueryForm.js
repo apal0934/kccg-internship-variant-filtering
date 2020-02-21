@@ -218,36 +218,17 @@ class ClinicianQuery extends Component {
 
         <Fade>
           <h3>Bucket Settings</h3>
-          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-            <Form.Item>
-              {getFieldDecorator("settings", {
-                initialValue: "default"
-              })(
-                <Radio.Group
-                  buttonStyle="solid"
-                  size="large"
-                  onChange={this.onChange}
-                  style={{ display: "block" }}
-                >
-                  <Col span={8} className="gutter-row">
-                    <Radio.Button value="default" style={{ display: "block" }}>
-                      Recommended Orrery
-                    </Radio.Button>
-                  </Col>
-                  <Col span={8} className="gutter-row">
-                    <Radio.Button value="rachel" style={{ display: "block" }}>
-                      Rachel's Settings
-                    </Radio.Button>
-                  </Col>
-                  <Col span={8} className="gutter-row">
-                    <Radio.Button value="custom" style={{ display: "block" }}>
-                      Custom
-                    </Radio.Button>
-                  </Col>
-                </Radio.Group>
-              )}
-            </Form.Item>
-          </Row>
+          <Form.Item>
+            {getFieldDecorator("settings", {
+              initialValue: "default"
+            })(
+              <Radio.Group size="large" onChange={this.onChange}>
+                <Radio.Button value="default">Recommended Orrery</Radio.Button>
+                <Radio.Button value="rachel">Rachel's Settings</Radio.Button>
+                <Radio.Button value="custom">Custom</Radio.Button>
+              </Radio.Group>
+            )}
+          </Form.Item>
         </Fade>
 
         <Fade>
