@@ -78,19 +78,19 @@ export default class ClinicianResult extends Component {
           <Col span={8}>
             <Statistic
               title="Name"
-              value={`${this.props.userData.user.firstName} ${this.props.userData.user.lastName}`}
+              value={`${this.props.userData.firstName} ${this.props.userData.lastName}`}
             />
           </Col>
           <Col span={8}>
             <Statistic
               title="Date of Birth"
-              value={this.props.userData.user.dateOfBirth.split("T")[0]}
+              value={this.props.userData.dateOfBirth.split("T")[0]}
             />
           </Col>
           <Col span={8}>
             <Statistic
               title="IDs"
-              value={`${this.props.userData.user.userId}; ${
+              value={`${this.props.userData.userId}; ${
                 this.props.geneData[this.props.geneData.length - 1].samples[0]
               }`}
             />

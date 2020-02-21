@@ -13,7 +13,7 @@ export default class ClinicianQueryValidation extends Component {
     const url = "http://localhost:3001/clinician";
     const body = {
       gene2variantData: {
-        samples: [this.props.mappingData.userToGenome.genomeId],
+        samples: [this.props.mappingData],
         geneQuery: {
           regions: this.props.formQueryValues.region,
           genes: this.props.formQueryValues.genes,
@@ -24,7 +24,7 @@ export default class ClinicianQueryValidation extends Component {
         alleleFreq: this.props.formQueryValues.alleleFreq,
         variantType: this.props.formQueryValues.variantType,
         impact: this.props.formQueryValues.impact,
-        clinvar: this.props.formQueryValues.clinvar
+        clinvar: "P"
       }
     };
 

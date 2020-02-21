@@ -10,9 +10,11 @@ class PatientConfirmation extends Component {
       }
     });
   };
-
+  componentDidMount() {}
   render() {
     const { getFieldDecorator, getFieldValue } = this.props.form;
+    console.log(this.props.userData);
+
     return (
       <div>
         <Descriptions
@@ -22,19 +24,19 @@ class PatientConfirmation extends Component {
           bordered
         >
           <Descriptions.Item label="First name">
-            {this.props.userData.user.firstName}
+            {this.props.userData.firstName}
           </Descriptions.Item>
           <Descriptions.Item label="Last name">
-            {this.props.userData.user.lastName}
+            {this.props.userData.lastName}
           </Descriptions.Item>
           <Descriptions.Item label="Date of birth">
-            {this.props.userData.user.dateOfBirth.split("T")[0]}
+            {this.props.userData.dateOfBirth.split("T")[0]}
           </Descriptions.Item>
           <Descriptions.Item label="Patient ID">
-            {this.props.userData.user.userId}
+            {this.props.userData.userId}
           </Descriptions.Item>
           <Descriptions.Item label="Sample ID">
-            {this.props.mappingData.userToGenome.genomeId}
+            {this.props.mappingData}
           </Descriptions.Item>
         </Descriptions>
         <Divider>Please review these details</Divider>
