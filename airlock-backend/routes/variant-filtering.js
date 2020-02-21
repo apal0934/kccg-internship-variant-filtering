@@ -20,6 +20,7 @@ function filterVariants(variants, alleleFreq, variantType, impact, clinvar) {
           break;
         default:
           a = true;
+          break;
       }
 
       var b = false;

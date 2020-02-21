@@ -8,6 +8,7 @@ require("https").globalAgent.options.ca = require("ssl-root-cas/latest").create(
 
 var indexRouter = require("./routes/index");
 var g2v = require("./routes/gene2variant.js");
+var p2s = require("./routes/patient2samples");
 var clincian = require("./routes/clinician.js");
 var researcher = require("./routes/researcher");
 var app = express();
@@ -30,6 +31,7 @@ app.use("/", indexRouter);
 app.use("/g2v", g2v);
 app.use("/clinician", clincian);
 app.use("/researcher", researcher);
+app.use("/p2s", p2s.router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
