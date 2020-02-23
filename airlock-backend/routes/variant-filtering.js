@@ -1,7 +1,14 @@
 var express = require("express");
 var router = express.Router();
 
-function filterVariants(variants, alleleFreq, variantType, impact, clinvar) {
+function filterVariants(
+  variants,
+  alleleFreq,
+  variantType,
+  impact,
+  operator,
+  clinvar
+) {
   var filtered = variants
     .filter(gene => {
       return gene.af <= alleleFreq / 100;
@@ -42,7 +49,10 @@ function filterVariants(variants, alleleFreq, variantType, impact, clinvar) {
       var c = gene.clinvar ? gene.clinvar.includes(clinvar) : false;
       // var d = gene.cadd >= 24
 
-      return a && (b || c);
+      if (operator === "or") {
+        return a && (b || c);
+      }
+      return a && b && c;
       // return a && (b || c || d)
     });
 

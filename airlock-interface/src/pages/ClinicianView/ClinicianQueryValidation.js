@@ -24,6 +24,7 @@ export default class ClinicianQueryValidation extends Component {
         alleleFreq: this.props.formQueryValues.alleleFreq,
         variantType: this.props.formQueryValues.variantType,
         impact: this.props.formQueryValues.impact,
+        operator: this.props.formQueryValues.operator,
         clinvar: "P"
       }
     };

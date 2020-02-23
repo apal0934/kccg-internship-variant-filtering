@@ -89,6 +89,7 @@ class Patient extends Component {
               ]
             })(<DatePicker placeholder="Select date" />)}
           </Form.Item>
+
           <Form.Item wrapperCol={{ span: 14, offset: 4 }}>
             <Button type="primary" htmlType="submit">
               Submit

@@ -7,7 +7,7 @@ var annotate = require("./annotate");
 
 function aggregate(gene2variantData, filterData) {
   const { samples, geneQuery } = gene2variantData;
-  const { alleleFreq, variantType, impact, clinvar } = filterData;
+  const { alleleFreq, variantType, impact, operator, clinvar } = filterData;
 
   var variants = gene2variant(samples, geneQuery);
   var annotatedVariants = annotate(variants);
@@ -16,6 +16,7 @@ function aggregate(gene2variantData, filterData) {
     alleleFreq,
     variantType,
     impact,
+    operator,
     clinvar
   );
 

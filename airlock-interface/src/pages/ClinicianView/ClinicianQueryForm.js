@@ -259,33 +259,62 @@ class ClinicianQuery extends Component {
         </Fade>
 
         <Fade>
-          <Form.Item>
-            <h4>Variant Type</h4>
-            {getFieldDecorator("impact", {
-              initialValue: "highmed"
-            })(
-              <Radio.Group disabled={!this.state.custom}>
-                <Radio.Button value="high">High</Radio.Button>
-                <Radio.Button value="highmed">High & Med</Radio.Button>
-                <Radio.Button value="all">All</Radio.Button>
-              </Radio.Group>
-            )}
-          </Form.Item>
-        </Fade>
-
-        <Fade>
-          <Form.Item>
-            <h4>Variant Type</h4>
-            {getFieldDecorator("variantType", {
-              initialValue: "both"
-            })(
-              <Radio.Group>
-                <Radio.Button value="snp">SNP</Radio.Button>
-                <Radio.Button value="indel">Indel</Radio.Button>
-                <Radio.Button value="both">Both</Radio.Button>
-              </Radio.Group>
-            )}
-          </Form.Item>
+          <Row>
+            <Col span={6}>
+              <Form.Item>
+                <h4>Variant Impact</h4>
+                {getFieldDecorator("impact", {
+                  initialValue: "highmed"
+                })(
+                  <Radio.Group disabled={!this.state.custom}>
+                    <Radio.Button value="high">High</Radio.Button>
+                    <Radio.Button value="highmed">High & Med</Radio.Button>
+                    <Radio.Button value="all">All</Radio.Button>
+                  </Radio.Group>
+                )}
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item>
+                <h4>Variant Type</h4>
+                {getFieldDecorator("variantType", {
+                  initialValue: "both"
+                })(
+                  <Radio.Group disabled={!this.state.custom}>
+                    <Radio.Button value="snp">SNP</Radio.Button>
+                    <Radio.Button value="indel">Indel</Radio.Button>
+                    <Radio.Button value="both">Both</Radio.Button>
+                  </Radio.Group>
+                )}
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item>
+                <h4>Filtering Operator - (CADD, Impact, ClinVar)</h4>
+                {getFieldDecorator("operator", {
+                  initialValue: "or"
+                })(
+                  <Radio.Group disabled={!this.state.custom}>
+                    <Radio.Button value="or">||</Radio.Button>
+                    <Radio.Button value="and">&&</Radio.Button>
+                  </Radio.Group>
+                )}
+              </Form.Item>
+            </Col>
+            <Col span={6}>
+              <Form.Item>
+                <h4>Query on Family? (Only if exists)</h4>
+                {getFieldDecorator("trio", {
+                  initialValue: "false"
+                })(
+                  <Radio.Group>
+                    <Radio.Button value="false">No</Radio.Button>
+                    <Radio.Button value="true">Yes</Radio.Button>
+                  </Radio.Group>
+                )}
+              </Form.Item>
+            </Col>
+          </Row>
         </Fade>
 
         <Fade>
