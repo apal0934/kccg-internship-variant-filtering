@@ -21,7 +21,7 @@ export default class ClinicianQueryValidation extends Component {
         }
       },
       filterData: {
-        alleleFreq: this.props.formQueryValues.alleleFreq,
+        alleleFreq: this.props.formQueryValues.alleleFreq / 100,
         variantType: this.props.formQueryValues.variantType,
         impact: this.props.formQueryValues.impact,
         operator: this.props.formQueryValues.operator,

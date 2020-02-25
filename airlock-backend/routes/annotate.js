@@ -22,7 +22,7 @@ function annotate(geneData, filterData, aggregate) {
   var consequence = {};
   console.log(variants.length);
   variants = variants.filter(gene => {
-    return gene.af <= filterData.alleleFreq / 100;
+    return gene.af <= filterData.alleleFreq;
   });
   console.log(variants.length);
   /* Format the variants from Vectis into VEP */
