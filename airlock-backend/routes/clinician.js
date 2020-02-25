@@ -10,22 +10,14 @@ function aggregate(gene2variantData, filterData) {
   const { alleleFreq, variantType, impact, operator, clinvar } = filterData;
 
   var variants = gene2variant(samples, geneQuery);
-  var annotatedVariants = annotate(variants);
-  var filteredVariants = filterVariants(
-    annotatedVariants,
-    alleleFreq,
-    variantType,
-    impact,
-    operator,
-    clinvar
-  );
+  var annotatedVariants = annotate(variants, filterData);
 
-  filteredVariants.push({
+  annotatedVariants.push({
     initial: variants.total,
-    filtered: filteredVariants.length,
+    filtered: annotatedVariants.length,
     samples: variants.coreQuery.samples
   });
-  return filteredVariants;
+  return annotatedVariants;
 }
 
 /* 
