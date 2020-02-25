@@ -7,7 +7,7 @@ function gene2variant(samples, geneQuery) {
   const url = "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
 
   /* Split gene input into array to count how many genes */
-  const lines = geneQuery.genes ? geneQuery.genes.split(/\r\n|\r|\n/) : [];
+  const lines = geneQuery.genes ? geneQuery.genes.split(",") : [];
   const numGenes = lines.length;
 
   const body = JSON.stringify({

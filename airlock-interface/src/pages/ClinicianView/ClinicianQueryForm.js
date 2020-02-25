@@ -93,10 +93,11 @@ class ClinicianQuery extends Component {
 
         axios.post(url, body, config).then(res => {
           this.props.form.setFieldsValue({
-            genes: res.data.hits.hits.map(gene => {
-              return gene._source.symbol;
-            }).join(`
-`)
+            genes: res.data.hits.hits
+              .map(gene => {
+                return gene._source.symbol;
+              })
+              .join(",")
           });
         });
       }
