@@ -35,40 +35,40 @@ export default class ClinicianResult extends Component {
         title: "Variant",
         key: "variant",
         render: record => (
-          <div>{`${record.c}:${record.s}${record.r}>${record.a}`}</div>
+          <div>{`${record["#Location"]}${record.REF_ALLELE}>${record.Allele}`}</div>
         ),
         ellipsis: true
       },
       {
         title: "Gene",
         key: "gene",
-        dataIndex: "gene"
+        dataIndex: "SYMBOL"
       },
       {
         title: "Type",
         key: "type",
-        dataIndex: "t"
+        dataIndex: "VARIANT_CLASS"
       },
       {
         title: "Allele Freq",
         key: "alleleFreq",
-        render: record => <div>{`${(record.af * 100).toFixed(2)}%`}</div>
-      },
-      {
-        title: "HomZ/HetZ",
-        key: "homhet",
-        render: record => <div>{`${record.homc}/${record.hetc}`}</div>
+        render: record => <div>{`${(record.AF * 100).toFixed(2)}%`}</div>
       },
       {
         title: "Impact",
         key: "impact",
-        dataIndex: "impact"
+        dataIndex: "IMPACT"
       },
       {
         title: "ClinVar",
         key: "clinvar",
-        dataIndex: "clinvar",
+        dataIndex: "CLIN_SIG",
         ellipsis: true
+      },
+      {
+        title: "CADD",
+        key: "cadd",
+        dataIndex: "CADD_PHRED"
       }
     ];
 
