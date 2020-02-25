@@ -25,7 +25,8 @@ export default class ClinicianQueryValidation extends Component {
         variantType: this.props.formQueryValues.variantType,
         impact: this.props.formQueryValues.impact,
         operator: this.props.formQueryValues.operator,
-        clinvar: "P"
+        clinvar: "P",
+        cadd: this.props.formQueryValues.cadd
       }
     };
 
