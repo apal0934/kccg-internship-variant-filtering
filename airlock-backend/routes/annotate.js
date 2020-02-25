@@ -1,46 +1,8 @@
 var express = require("express");
 var router = express.Router();
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
-impactEnum = {
-  transcript_ablation: "HIGH",
-  splice_acceptor_variant: "HIGH",
-  splice_donor_variant: "HIGH",
-  stop_gained: "HIGH",
-  frameshift_variant: "HIGH",
-  stop_lost: "HIGH",
-  start_lost: "HIGH",
-  transcript_amplification: "HIGH",
-  inframe_insertion: "MODERATE",
-  inframe_deletion: "MODERATE",
-  missense_variant: "MODERATE",
-  protein_altering_variant: "MODERATE",
-  splice_region_variant: "LOW",
-  incomplete_terminal_codon_variant: "LOW",
-  start_retained_variant: "LOW",
-  stop_retained_variant: "LOW",
-  synonymous_variant: "LOW",
-  coding_sequence_variant: "MODIFIER",
-  mature_miRNA_variant: "MODIFIER",
-  "5_prime_UTR_variant": "MODIFIER",
-  "3_prime_UTR_variant": "MODIFIER",
-  non_coding_transcript_exon_variant: "MODIFIER",
-  intron_variant: "MODIFIER",
-  NMD_transcript_variant: "MODIFIER",
-  non_coding_transcript_variant: "MODIFIER",
-  upstream_gene_variant: "MODIFIER",
-  downstream_gene_variant: "MODIFIER",
-  TFBS_ablation: "MODIFIER",
-  TFBS_amplification: "MODIFIER",
-  TF_binding_site_variant: "MODIFIER",
-  regulatory_region_ablation: "MODIFIER",
-  regulatory_region_amplification: "MODIFIER",
-  feature_elongation: "MODIFIER",
-  regulatory_region_variant: "MODIFIER",
-  feature_truncation: "MODIFIER",
-  intergenic_variant: "MODIFIER"
-};
+var fs = require("fs");
+const execSync = require("child_process").execSync;
 
 function sort(a, b) {
   let comp = 0;
@@ -53,55 +15,102 @@ function sort(a, b) {
   return comp;
 }
 
-function annotate(geneData, aggregate) {
+function annotate(geneData, filterData, aggregate) {
   var variants = geneData.v;
   var clinvar = {};
   var type = {};
   var consequence = {};
-  /* 
-    For each gene queried (number of chromosomes in query):
-      retrieve all variants + annotations in that gene, and,
-      add those annotations to the corresponding variants in geneData 
-  */
-  geneData.coreQuery.chromosome.forEach((chromosome, i) => {
-    let url = `https://vsal.garvan.org.au/ssvs/demo/query?chr=${chromosome.substring(
-      3
-    )}&start=${geneData.coreQuery.positionStart[i]}&end=${
-      geneData.coreQuery.positionEnd[i]
-    }&limit=10000&sortBy=start&descend=false&skip=0&count=true&annot=true&dataset=demo`;
-
-    var request = new XMLHttpRequest();
-    request.open("GET", url, false);
-    request.send(null);
-
-    if (request.status === 200) {
-      var res = JSON.parse(request.responseText);
-
-      res.variants.forEach(globalVariant => {
-        variants.forEach(sampleVariant => {
-          if (
-            globalVariant.chr === sampleVariant.c &&
-            globalVariant.start === sampleVariant.s &&
-            globalVariant.alt === sampleVariant.a &&
-            globalVariant.ref === sampleVariant.r
-          ) {
-            sampleVariant["impact"] = impactEnum[globalVariant.consequences];
-            sampleVariant["clinvar"] = globalVariant.clinvar;
-            sampleVariant["gene"] = globalVariant.geneSymbol;
-
-            if (aggregate) {
-              clinvar[globalVariant.clinvar] =
-                (clinvar[globalVariant.clinvar] || 0) + 1;
-              type[globalVariant.type] = (type[globalVariant.type] || 0) + 1;
-              consequence[globalVariant.consequences] =
-                (consequence[globalVariant.consequences] || 0) + 1;
-            }
-          }
-        });
-      });
+  console.log(variants.length);
+  variants = variants.filter(gene => {
+    return gene.af <= filterData.alleleFreq / 100;
+  });
+  console.log(variants.length);
+  /* Format the variants from Vectis into VEP */
+  var data = "";
+  variants.forEach(variant => {
+    data += `${variant.c} `;
+    if (variant.t === "INS") {
+      data += `${variant.s + 1} ${variant.s} `;
+      data += `-/${variant.a.slice(1)} `;
+    } else if (variant.t === "DEL") {
+      data += `${variant.s + 1} ${variant.s + (variant.r.length - 1)} `;
+      data += `${variant.r.slice(1)}/- `;
+    } else {
+      data += `${variant.s} ${variant.s} ${variant.r}/${variant.a} `;
     }
+    data += `+\n`;
+  });
+  /* Write to a file VEP can read. This kind of path hard coding is bad but hey it's just a prototype */
+  fs.writeFileSync("/Users/alexpalmer/ensembl-vep/variants.txt", data);
+  /* Setup initial command */
+  /* This will not work on other machines, sorry :( */
+  var command =
+    'source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,../whole_genome_SNVs.tsv.gz,../InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout ';
+  /* Add AF, CADD and ClinVar filters */
+  command += `--filter "(AF < ${filterData.alleleFreq} or not AF) and (CADD_PHRED >= ${filterData.cadd} ${filterData.operator} CLIN_SIG match ${filterData.clinvar} ${filterData.operator} `;
+
+  switch (filterData.impact) {
+    case "all":
+      command += `(IMPACT != MODIFIER))"`;
+      break;
+    case "high":
+      command += `(IMPACT is HIGH))"`;
+      break;
+    case "highmed":
+      command += `(IMPACT in MODERATE,HIGH))"`;
+      break;
+    default:
+      command += ')"';
+  }
+
+  switch (filterData.variantType) {
+    case "snp":
+      command += ' --filter "VARIANT_CLASS is SNV"';
+      break;
+    case "indel":
+      command += ` --filter "VARIANT_CLASS in insertion,deletion,indel"`;
+      break;
+    default:
+      break;
+  }
+  console.log(command);
+  const output = execSync(command, {
+    cwd: "/Users/alexpalmer/ensembl-vep/",
+    encoding: "utf-8"
+  });
+  /* Split output into lines */
+  var lines = output.split("\n");
+  /* Reduce to header + data */
+  lines = lines.slice(33, lines.length - 1);
+  /* Isolate header */
+  const headers = lines[0].split("\t");
+  const annotatedVariants = [];
+
+  /* On all lines that are not the header... */
+  lines.slice(1, lines.length).forEach(line => {
+    /* Split into each entry */
+    var datapoints = line.split("\t");
+    var annotatedVariant = {};
+
+    /* For each entry, store it in the object with the key from the header */
+    datapoints.forEach((datapoint, j) => {
+      annotatedVariant[headers[j]] = datapoint;
+    });
+
+    /* If research aggregation, count all occurances of each */
+    if (aggregate) {
+      clinvar[annotatedVariant.CLIN_SIG] =
+        (clinvar[annotatedVariant.CLIN_SIG] || 0) + 1;
+      type[annotatedVariant.VARIANT_CLASS] =
+        (type[annotatedVariant.VARIANT_CLASS] || 0) + 1;
+      consequence[annotatedVariant.Consequence] =
+        (consequence[annotatedVariant.Consequence] || 0) + 1;
+    }
+
+    annotatedVariants.push(annotatedVariant);
   });
 
+  /* If research, format the data into how the table can read it */
   if (aggregate) {
     var clinvarData = [];
     var typeData = [];
@@ -132,7 +141,7 @@ function annotate(geneData, aggregate) {
     };
   }
 
-  return variants;
+  return annotatedVariants;
 }
 
 /*
