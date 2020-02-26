@@ -39,10 +39,8 @@ function gene2variant(samples, geneQuery, callback) {
       Authorization: "Bearer fakeTokenForDemo"
     }
   };
-  io.sockets.to("test").emit("progress", "Requesting gene co-ordinates...");
+  io.sockets.to("test").emit("progress", 0);
   axios.post(url, body, config).then(searchResult => {
-    io.sockets.to("test").emit("progress", "Converting response...");
-
     /* If genes found, sort into CSVs of Chromosome, Position Start/End
        Otherwise, assume region was given.
        Region in format chromosome:start-end */
@@ -91,7 +89,7 @@ function gene2variant(samples, geneQuery, callback) {
         .join(",");
     }
 
-    io.sockets.to("test").emit("progress", "Requesting variants...");
+    io.sockets.to("test").emit("progress", 1);
 
     /* KCCG clinical filtering, retrieve variants on genes for samples */
     const url = "https://vsal.garvan.org.au/vsal/core/find";

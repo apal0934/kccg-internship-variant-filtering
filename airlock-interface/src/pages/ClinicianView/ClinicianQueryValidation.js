@@ -1,13 +1,16 @@
 import React, { Component } from "react";
 
+import { Steps } from "antd";
 import axios from "axios";
 import socketIOClient from "socket.io-client";
+
+const { Step } = Steps;
 
 export default class ClinicianQueryValidation extends Component {
   state = {
     geneData: [],
-    isLoading: true,
-    progess: ""
+    progess: 0,
+    error: false
   };
 
   componentDidMount() {
@@ -38,12 +41,37 @@ export default class ClinicianQueryValidation extends Component {
         progess: data
       });
     });
-    axios.post(url, body).then(res => {
-      this.props.parentCallback(false, res.data);
-    });
+    axios
+      .post(url, body)
+      .then(res => {
+        this.props.parentCallback(false, res.data);
+      })
+      .catch(error => {
+        this.setState({
+          error: true
+        });
+      });
   }
 
   render() {
-    return <div>{this.state.progess}</div>;
+    return (
+      <div>
+        <Steps
+          current={this.state.progess}
+          status={this.state.error ? "error" : "process"}
+        >
+          <Step title="Requesting gene locations" description="Chr:Start-End" />
+          <Step
+            title="Requesting variants"
+            description="Retrieving from Variant Atlas"
+          />
+          <Step
+            title="Annotating variants with VEP"
+            description="This takes a while :("
+          />
+          <Step title="Finishing up!" description="Processing results" />
+        </Steps>
+      </div>
+    );
   }
 }

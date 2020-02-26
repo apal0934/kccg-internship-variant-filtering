@@ -21,16 +21,10 @@ function annotate(geneData, filterData, aggregate, callback) {
   var type = {};
   var consequence = {};
 
-  io.sockets
-    .to("test")
-    .emit("progress", "Filtering variants by allelic frequency...");
-
   variants = variants.filter(gene => {
     return gene.af <= filterData.alleleFreq;
   });
   /* Format the variants from Vectis into VEP */
-  io.sockets.to("test").emit("progress", "Formatting variants into VEP");
-
   var data = "";
   variants.forEach(variant => {
     data += `${variant.c} `;
@@ -45,14 +39,13 @@ function annotate(geneData, filterData, aggregate, callback) {
     }
     data += `+\n`;
   });
-  io.sockets.to("test").emit("progress", "Writing to file...");
 
   /* Write to a file VEP can read. This kind of path hard coding is bad but hey it's just a prototype */
   fs.writeFile("/Users/alexpalmer/ensembl-vep/variants.txt", data, err => {
     if (err) throw err;
     /* Setup initial command */
     /* This will not work on other machines, sorry :( */
-    io.sockets.to("test").emit("progress", "Constructing VEP command...");
+    io.sockets.to("test").emit("progress", 6);
 
     var command =
       'source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,../whole_genome_SNVs.tsv.gz,../InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout ';
@@ -83,12 +76,7 @@ function annotate(geneData, filterData, aggregate, callback) {
       default:
         break;
     }
-    io.sockets
-      .to("test")
-      .emit(
-        "progress",
-        "Annotating variants with VEP (this may take a while)..."
-      );
+    io.sockets.to("test").emit("progress", 2);
 
     exec(
       command,
@@ -98,7 +86,7 @@ function annotate(geneData, filterData, aggregate, callback) {
       },
       (err, output) => {
         if (err) throw err;
-        io.sockets.to("test").emit("progress", "Annotated! Finishing up....");
+        io.sockets.to("test").emit("progress", 3);
 
         /* Split output into lines */
         var lines = output.split("\n");
