@@ -4,6 +4,7 @@ var router = express.Router();
 var consent2samples = require("./consent2samples");
 var gene2variant = require("./gene2variant");
 var annotate = require("./annotate");
+var io = require("../socketApi").io;
 
 function aggregate(consentData, gene2variantData, filterData, callback) {
   const { geneQuery } = gene2variantData;
@@ -16,6 +17,8 @@ function aggregate(consentData, gene2variantData, filterData, callback) {
           samples: samples.length,
           variants: variants.total
         };
+        io.sockets.to("test").emit("progress", 5);
+
         callback(annotatedVariants);
       });
     });
@@ -50,8 +53,8 @@ router.post("/", function(req, res) {
     req.body.consentData,
     req.body.gene2variantData,
     req.body.filterData,
-    data => {
-      res.send(data);
+    response => {
+      res.send(response);
     }
   );
 });
