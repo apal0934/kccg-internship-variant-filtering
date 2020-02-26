@@ -92,6 +92,7 @@ class ResearcherQuery extends Component {
                       <TextArea
                         autoSize
                         placeholder="Enter variant or list of variants"
+                        disabled
                       ></TextArea>
                     )}
                   </Form.Item>
@@ -110,6 +111,7 @@ class ResearcherQuery extends Component {
                     dataSource={data}
                     onSearch={this.onSearch}
                     placeholder={"HPO (optional)"}
+                    disabled
                   />
                 )}
               </Form.Item>

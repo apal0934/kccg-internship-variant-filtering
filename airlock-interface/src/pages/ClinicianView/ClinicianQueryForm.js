@@ -213,6 +213,7 @@ class ClinicianQuery extends Component {
                       <TextArea
                         autoSize
                         placeholder="Enter variant or list of variants"
+                        disabled
                       ></TextArea>
                     )}
                   </Form.Item>
