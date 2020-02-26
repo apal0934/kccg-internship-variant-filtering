@@ -65,8 +65,13 @@ class ClinicianQuery extends Component {
           }
         };
 
-        var genes = xhr.response.compact_associations[0].objects.map(gene => {
-          return gene.substring(5);
+        var genes = [];
+        xhr.response.compact_associations.forEach(association => {
+          association.objects.forEach(gene => {
+            if (gene.startsWith("HGNC")) {
+              genes.push(gene.substring(5));
+            }
+          });
         });
         const numGenes = genes.length;
         const body = JSON.stringify({
