@@ -2,9 +2,7 @@ var express = require("express");
 var router = express.Router();
 
 var gene2variant = require("./gene2variant");
-var filterVariants = require("./variant-filtering");
 var annotate = require("./annotate");
-var io = require("../socketApi").io;
 
 function aggregate(gene2variantData, filterData, callback) {
   const { samples, geneQuery } = gene2variantData;

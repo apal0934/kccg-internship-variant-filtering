@@ -21,9 +21,12 @@ function annotate(geneData, filterData, aggregate, callback) {
   var type = {};
   var consequence = {};
 
-  variants = variants.filter(gene => {
-    return gene.af <= filterData.alleleFreq;
-  });
+  if (filterData.filter === "yes") {
+    variants = variants.filter(gene => {
+      return gene.af <= filterData.alleleFreq;
+    });
+  }
+
   /* Format the variants from Vectis into VEP */
   var data = "";
   variants.forEach(variant => {
@@ -45,36 +48,37 @@ function annotate(geneData, filterData, aggregate, callback) {
     if (err) throw err;
     /* Setup initial command */
     /* This will not work on other machines, sorry :( */
-    io.sockets.to("test").emit("progress", 6);
 
     var command =
-      'source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,../whole_genome_SNVs.tsv.gz,../InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout ';
+      'source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,../whole_genome_SNVs.tsv.gz,../InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout --filter "SYMBOL exists" ';
     /* Add AF, CADD and ClinVar filters */
-    command += `--filter "(AF < ${filterData.alleleFreq} or not AF) and (CADD_PHRED >= ${filterData.cadd} ${filterData.operator} CLIN_SIG match ${filterData.clinvar} ${filterData.operator} `;
+    if (filterData.filter === "yes") {
+      command += `--filter "(AF < ${filterData.alleleFreq} or not AF) and (CADD_PHRED >= ${filterData.cadd} ${filterData.operator} CLIN_SIG match ${filterData.clinvar} ${filterData.operator} `;
 
-    switch (filterData.impact) {
-      case "all":
-        command += `(IMPACT != MODIFIER))"`;
-        break;
-      case "high":
-        command += `(IMPACT is HIGH))"`;
-        break;
-      case "highmed":
-        command += `(IMPACT in MODERATE,HIGH))"`;
-        break;
-      default:
-        command += ')"';
-    }
+      switch (filterData.impact) {
+        case "all":
+          command += `(IMPACT != MODIFIER))"`;
+          break;
+        case "high":
+          command += `(IMPACT is HIGH))"`;
+          break;
+        case "highmed":
+          command += `(IMPACT in MODERATE,HIGH))"`;
+          break;
+        default:
+          command += ')"';
+      }
 
-    switch (filterData.variantType) {
-      case "snp":
-        command += ' --filter "VARIANT_CLASS is SNV"';
-        break;
-      case "indel":
-        command += ` --filter "VARIANT_CLASS in insertion,deletion,indel"`;
-        break;
-      default:
-        break;
+      switch (filterData.variantType) {
+        case "snp":
+          command += ' --filter "VARIANT_CLASS is SNV"';
+          break;
+        case "indel":
+          command += ` --filter "VARIANT_CLASS in insertion,deletion,indel"`;
+          break;
+        default:
+          break;
+      }
     }
     io.sockets.to("test").emit("progress", 2);
 
@@ -87,7 +91,6 @@ function annotate(geneData, filterData, aggregate, callback) {
       (err, output) => {
         if (err) throw err;
         io.sockets.to("test").emit("progress", 3);
-
         /* Split output into lines */
         var lines = output.split("\n");
         /* Reduce to header + data */
@@ -127,7 +130,7 @@ function annotate(geneData, filterData, aggregate, callback) {
           var consequenceData = [];
 
           Object.keys(clinvar).forEach(key => {
-            if (key !== "null")
+            if (key !== "null" && key !== "-")
               clinvarData.push({ name: key, value: clinvar[key] });
           });
           Object.keys(type).forEach(key => {
@@ -145,14 +148,14 @@ function annotate(geneData, filterData, aggregate, callback) {
           typeData.sort(sort);
           consequenceData.sort(sort);
 
-          return {
+          callback({
             clinvar: clinvarData,
             type: typeData,
             consequence: consequenceData
-          };
+          });
+        } else {
+          callback(annotatedVariants);
         }
-
-        callback(annotatedVariants);
       }
     );
   });
