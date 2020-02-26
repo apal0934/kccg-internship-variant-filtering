@@ -4,20 +4,21 @@ var router = express.Router();
 var gene2variant = require("./gene2variant");
 var filterVariants = require("./variant-filtering");
 var annotate = require("./annotate");
+var io = require("../socketApi").io;
 
-function aggregate(gene2variantData, filterData) {
+function aggregate(gene2variantData, filterData, callback) {
   const { samples, geneQuery } = gene2variantData;
-  const { alleleFreq, variantType, impact, operator, clinvar } = filterData;
 
-  var variants = gene2variant(samples, geneQuery);
-  var annotatedVariants = annotate(variants, filterData);
-
-  annotatedVariants.push({
-    initial: variants.total,
-    filtered: annotatedVariants.length,
-    samples: variants.coreQuery.samples
+  gene2variant(samples, geneQuery, variants => {
+    annotate(variants, filterData, false, annotatedVariants => {
+      annotatedVariants.push({
+        initial: variants.total,
+        filtered: annotatedVariants.length,
+        samples: variants.coreQuery.samples
+      });
+      callback(annotatedVariants);
+    });
   });
-  return annotatedVariants;
 }
 
 /* 
@@ -42,7 +43,9 @@ function aggregate(gene2variantData, filterData) {
     :attr str clinvar: string to match to clinvar term
 */
 router.post("/", function(req, res) {
-  res.send(aggregate(req.body.gene2variantData, req.body.filterData));
+  aggregate(req.body.gene2variantData, req.body.filterData, response => {
+    res.send(response);
+  });
 });
 
 module.exports = router;

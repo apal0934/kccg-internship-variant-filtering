@@ -1,8 +1,8 @@
 var express = require("express");
 var router = express.Router();
-var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 var fs = require("fs");
-const execSync = require("child_process").execSync;
+const exec = require("child_process").exec;
+var io = require("../socketApi").io;
 
 function sort(a, b) {
   let comp = 0;
@@ -15,17 +15,22 @@ function sort(a, b) {
   return comp;
 }
 
-function annotate(geneData, filterData, aggregate) {
+function annotate(geneData, filterData, aggregate, callback) {
   var variants = geneData.v;
   var clinvar = {};
   var type = {};
   var consequence = {};
-  console.log(variants.length);
+
+  io.sockets
+    .to("test")
+    .emit("progress", "Filtering variants by allelic frequency...");
+
   variants = variants.filter(gene => {
     return gene.af <= filterData.alleleFreq;
   });
-  console.log(variants.length);
   /* Format the variants from Vectis into VEP */
+  io.sockets.to("test").emit("progress", "Formatting variants into VEP");
+
   var data = "";
   variants.forEach(variant => {
     data += `${variant.c} `;
@@ -40,108 +45,129 @@ function annotate(geneData, filterData, aggregate) {
     }
     data += `+\n`;
   });
+  io.sockets.to("test").emit("progress", "Writing to file...");
+
   /* Write to a file VEP can read. This kind of path hard coding is bad but hey it's just a prototype */
-  fs.writeFileSync("/Users/alexpalmer/ensembl-vep/variants.txt", data);
-  /* Setup initial command */
-  /* This will not work on other machines, sorry :( */
-  var command =
-    'source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,../whole_genome_SNVs.tsv.gz,../InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout ';
-  /* Add AF, CADD and ClinVar filters */
-  command += `--filter "(AF < ${filterData.alleleFreq} or not AF) and (CADD_PHRED >= ${filterData.cadd} ${filterData.operator} CLIN_SIG match ${filterData.clinvar} ${filterData.operator} `;
+  fs.writeFile("/Users/alexpalmer/ensembl-vep/variants.txt", data, err => {
+    if (err) throw err;
+    /* Setup initial command */
+    /* This will not work on other machines, sorry :( */
+    io.sockets.to("test").emit("progress", "Constructing VEP command...");
 
-  switch (filterData.impact) {
-    case "all":
-      command += `(IMPACT != MODIFIER))"`;
-      break;
-    case "high":
-      command += `(IMPACT is HIGH))"`;
-      break;
-    case "highmed":
-      command += `(IMPACT in MODERATE,HIGH))"`;
-      break;
-    default:
-      command += ')"';
-  }
+    var command =
+      'source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,../whole_genome_SNVs.tsv.gz,../InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout ';
+    /* Add AF, CADD and ClinVar filters */
+    command += `--filter "(AF < ${filterData.alleleFreq} or not AF) and (CADD_PHRED >= ${filterData.cadd} ${filterData.operator} CLIN_SIG match ${filterData.clinvar} ${filterData.operator} `;
 
-  switch (filterData.variantType) {
-    case "snp":
-      command += ' --filter "VARIANT_CLASS is SNV"';
-      break;
-    case "indel":
-      command += ` --filter "VARIANT_CLASS in insertion,deletion,indel"`;
-      break;
-    default:
-      break;
-  }
-  console.log(command);
-  const output = execSync(command, {
-    cwd: "/Users/alexpalmer/ensembl-vep/",
-    encoding: "utf-8"
-  });
-  /* Split output into lines */
-  var lines = output.split("\n");
-  /* Reduce to header + data */
-  lines = lines.slice(33, lines.length - 1);
-  /* Isolate header */
-  const headers = lines[0].split("\t");
-  const annotatedVariants = [];
-
-  /* On all lines that are not the header... */
-  lines.slice(1, lines.length).forEach(line => {
-    /* Split into each entry */
-    var datapoints = line.split("\t");
-    var annotatedVariant = {};
-
-    /* For each entry, store it in the object with the key from the header */
-    datapoints.forEach((datapoint, j) => {
-      annotatedVariant[headers[j]] = datapoint;
-    });
-
-    /* If research aggregation, count all occurances of each */
-    if (aggregate) {
-      clinvar[annotatedVariant.CLIN_SIG] =
-        (clinvar[annotatedVariant.CLIN_SIG] || 0) + 1;
-      type[annotatedVariant.VARIANT_CLASS] =
-        (type[annotatedVariant.VARIANT_CLASS] || 0) + 1;
-      consequence[annotatedVariant.Consequence] =
-        (consequence[annotatedVariant.Consequence] || 0) + 1;
+    switch (filterData.impact) {
+      case "all":
+        command += `(IMPACT != MODIFIER))"`;
+        break;
+      case "high":
+        command += `(IMPACT is HIGH))"`;
+        break;
+      case "highmed":
+        command += `(IMPACT in MODERATE,HIGH))"`;
+        break;
+      default:
+        command += ')"';
     }
 
-    annotatedVariants.push(annotatedVariant);
-  });
+    switch (filterData.variantType) {
+      case "snp":
+        command += ' --filter "VARIANT_CLASS is SNV"';
+        break;
+      case "indel":
+        command += ` --filter "VARIANT_CLASS in insertion,deletion,indel"`;
+        break;
+      default:
+        break;
+    }
+    io.sockets
+      .to("test")
+      .emit(
+        "progress",
+        "Annotating variants with VEP (this may take a while)..."
+      );
 
-  /* If research, format the data into how the table can read it */
-  if (aggregate) {
-    var clinvarData = [];
-    var typeData = [];
-    var consequenceData = [];
+    exec(
+      command,
+      {
+        cwd: "/Users/alexpalmer/ensembl-vep/",
+        encoding: "utf-8"
+      },
+      (err, output) => {
+        if (err) throw err;
+        io.sockets.to("test").emit("progress", "Annotated! Finishing up....");
 
-    Object.keys(clinvar).forEach(key => {
-      if (key !== "null") clinvarData.push({ name: key, value: clinvar[key] });
-    });
-    Object.keys(type).forEach(key => {
-      if (key !== "null") typeData.push({ name: key, value: type[key] });
-    });
-    Object.keys(consequence).forEach(key => {
-      if (key !== "null" && consequence[key] >= 20)
-        consequenceData.push({
-          name: key,
-          value: consequence[key]
+        /* Split output into lines */
+        var lines = output.split("\n");
+        /* Reduce to header + data */
+        lines = lines.slice(33, lines.length - 1);
+        /* Isolate header */
+        const headers = lines[0].split("\t");
+        const annotatedVariants = [];
+
+        /* On all lines that are not the header... */
+        lines.slice(1, lines.length).forEach(line => {
+          /* Split into each entry */
+          var datapoints = line.split("\t");
+          var annotatedVariant = {};
+
+          /* For each entry, store it in the object with the key from the header */
+          datapoints.forEach((datapoint, j) => {
+            annotatedVariant[headers[j]] = datapoint;
+          });
+
+          /* If research aggregation, count all occurances of each */
+          if (aggregate) {
+            clinvar[annotatedVariant.CLIN_SIG] =
+              (clinvar[annotatedVariant.CLIN_SIG] || 0) + 1;
+            type[annotatedVariant.VARIANT_CLASS] =
+              (type[annotatedVariant.VARIANT_CLASS] || 0) + 1;
+            consequence[annotatedVariant.Consequence] =
+              (consequence[annotatedVariant.Consequence] || 0) + 1;
+          }
+
+          annotatedVariants.push(annotatedVariant);
         });
-    });
 
-    clinvarData.sort(sort);
-    typeData.sort(sort);
-    consequenceData.sort(sort);
+        /* If research, format the data into how the table can read it */
+        if (aggregate) {
+          var clinvarData = [];
+          var typeData = [];
+          var consequenceData = [];
 
-    return {
-      clinvar: clinvarData,
-      type: typeData,
-      consequence: consequenceData
-    };
-  }
+          Object.keys(clinvar).forEach(key => {
+            if (key !== "null")
+              clinvarData.push({ name: key, value: clinvar[key] });
+          });
+          Object.keys(type).forEach(key => {
+            if (key !== "null") typeData.push({ name: key, value: type[key] });
+          });
+          Object.keys(consequence).forEach(key => {
+            if (key !== "null" && consequence[key] >= 20)
+              consequenceData.push({
+                name: key,
+                value: consequence[key]
+              });
+          });
 
-  return annotatedVariants;
+          clinvarData.sort(sort);
+          typeData.sort(sort);
+          consequenceData.sort(sort);
+
+          return {
+            clinvar: clinvarData,
+            type: typeData,
+            consequence: consequenceData
+          };
+        }
+
+        callback(annotatedVariants);
+      }
+    );
+  });
 }
 
 /*

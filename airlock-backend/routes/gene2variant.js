@@ -2,8 +2,10 @@ var express = require("express");
 var router = express.Router();
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+var io = require("../socketApi").io;
+var axios = require("axios");
 
-function gene2variant(samples, geneQuery) {
+function gene2variant(samples, geneQuery, callback) {
   const url = "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
 
   /* Split gene input into array to count how many genes */
@@ -31,17 +33,20 @@ function gene2variant(samples, geneQuery) {
     },
     sort: [{ _score: { order: "desc" } }]
   });
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer fakeTokenForDemo"
+    }
+  };
+  io.sockets.to("test").emit("progress", "Requesting gene co-ordinates...");
+  axios.post(url, body, config).then(searchResult => {
+    io.sockets.to("test").emit("progress", "Converting response...");
 
-  var request = new XMLHttpRequest();
-  request.open("POST", url, false);
-  request.setRequestHeader("Content-Type", "application/json");
-  request.send(body);
-
-  if (request.status === 200) {
     /* If genes found, sort into CSVs of Chromosome, Position Start/End
        Otherwise, assume region was given.
        Region in format chromosome:start-end */
-    var searchResult = JSON.parse(request.responseText);
+    searchResult = searchResult.data;
     var chromosome;
     var positionStart;
     var positionEnd;
@@ -86,13 +91,10 @@ function gene2variant(samples, geneQuery) {
         .join(",");
     }
 
+    io.sockets.to("test").emit("progress", "Requesting variants...");
+
     /* KCCG clinical filtering, retrieve variants on genes for samples */
     const url = "https://vsal.garvan.org.au/vsal/core/find";
-
-    var find = new XMLHttpRequest();
-    find.open("POST", url, false);
-    find.setRequestHeader("Content-Type", "application/json");
-    find.setRequestHeader("Authorization", "Bearer fakeTokenForDemo");
 
     const body = JSON.stringify({
       chromosome: chromosome,
@@ -104,12 +106,10 @@ function gene2variant(samples, geneQuery) {
       dataset: "demo"
     });
 
-    find.send(body);
-
-    if (find.status === 200) {
-      return JSON.parse(find.responseText);
-    }
-  }
+    axios.post(url, body, config).then(res => {
+      callback(res.data);
+    });
+  });
 }
 
 /*
