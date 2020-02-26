@@ -4,6 +4,7 @@ var path = require("path");
 var cors = require("cors");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+var socketIo = require("socket.io");
 require("https").globalAgent.options.ca = require("ssl-root-cas/latest").create();
 
 var indexRouter = require("./routes/index");
@@ -16,6 +17,9 @@ var app = express();
 var corsOptions = {
   origin: "*"
 };
+
+var io = socketIo();
+app.io = io;
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
