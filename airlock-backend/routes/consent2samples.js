@@ -1,8 +1,8 @@
 var express = require("express");
 var router = express.Router();
-var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+var axios = require("axios");
 
-function consent2samples(consentOrg, consentPurpose, consentHpos) {
+function consent2samples(consentData, callback) {
   var url = "http://localhost:8000";
   var body = JSON.stringify({
     query: `query UserQuery(
@@ -22,20 +22,17 @@ function consent2samples(consentOrg, consentPurpose, consentHpos) {
         }
       }`,
     variables: {
-      consentOrg: consentOrg,
-      consentPurpose: consentPurpose,
-      consentHpos: consentHpos
+      consentOrg: consentData.consentOrg,
+      consentPurpose: consentData.consentPurpose,
+      consentHpos: consentData.consentHpos
     }
   });
-  var request = new XMLHttpRequest();
-  request.open("POST", url, false);
-  request.setRequestHeader("Content-Type", "application/json");
-  request.send(body);
-
-  if (request.status === 200) {
-    url = "http://localhost:7000";
-    body = JSON.stringify({
-      query: `
+  axios
+    .post(url, body)
+    .then(userRes => {
+      url = "http://localhost:7000";
+      body = JSON.stringify({
+        query: `
           query GenomeQuery($userIds: [Int]) {
             usersToGenomes(userIds: $userIds) {
               userId
@@ -43,23 +40,28 @@ function consent2samples(consentOrg, consentPurpose, consentHpos) {
             }
           }
         `,
-      variables: {
-        userIds: JSON.parse(request.responseText).data.users.map(user => {
-          return user.userId;
-        })
-      }
-    });
-    request = new XMLHttpRequest();
-    request.open("POST", url, false);
-    request.setRequestHeader("Content-Type", "application/json");
-    request.send(body);
-
-    if (request.status === 200) {
-      return JSON.parse(request.responseText).data.usersToGenomes.map(user => {
-        return user.genomeId;
+        variables: {
+          userIds: userRes.data.users.map(user => {
+            return user.userId;
+          })
+        }
       });
-    }
-  }
+      axios
+        .post(url, body)
+        .then(sampleRes => {
+          callback(
+            sampleRes.data.usersToGenomes.map(user => {
+              return user.genomeId;
+            })
+          );
+        })
+        .catch(err => {
+          throw err;
+        });
+    })
+    .catch(err => {
+      throw err;
+    });
 }
 
 /* GET home page. */
@@ -73,5 +75,4 @@ router.get("/", function(req, res, next) {
   );
 });
 
-module.exports = router;
 module.exports = consent2samples;
