@@ -27,8 +27,13 @@ function consent2samples(consentData, callback) {
       consentHpos: consentData.consentHpos
     }
   });
+  const config = {
+    headers: {
+      "Content-Type": "application/json"
+    }
+  };
   axios
-    .post(url, body)
+    .post(url, body, config)
     .then(userRes => {
       url = "http://localhost:7000";
       body = JSON.stringify({
@@ -41,16 +46,16 @@ function consent2samples(consentData, callback) {
           }
         `,
         variables: {
-          userIds: userRes.data.users.map(user => {
+          userIds: userRes.data.data.users.map(user => {
             return user.userId;
           })
         }
       });
       axios
-        .post(url, body)
+        .post(url, body, config)
         .then(sampleRes => {
           callback(
-            sampleRes.data.usersToGenomes.map(user => {
+            sampleRes.data.data.usersToGenomes.map(user => {
               return user.genomeId;
             })
           );
