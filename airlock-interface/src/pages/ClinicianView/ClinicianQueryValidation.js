@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 
-import { Fragment } from "react";
 import axios from "axios";
+import socketIOClient from "socket.io-client";
 
 export default class ClinicianQueryValidation extends Component {
   state = {
     geneData: [],
-    isLoading: true
+    isLoading: true,
+    progess: ""
   };
 
   componentDidMount() {
@@ -29,13 +30,20 @@ export default class ClinicianQueryValidation extends Component {
         cadd: this.props.formQueryValues.cadd
       }
     };
-
+    const socket = socketIOClient.connect("http://localhost:3001", {
+      transports: ["websocket"]
+    });
+    socket.on("progress", data => {
+      this.setState({
+        progess: data
+      });
+    });
     axios.post(url, body).then(res => {
       this.props.parentCallback(false, res.data);
     });
   }
 
   render() {
-    return <Fragment />;
+    return <div>{this.state.progess}</div>;
   }
 }
