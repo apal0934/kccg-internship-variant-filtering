@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 
-var gene2variant = require("./gene2variant");
+var gene2variant = require("./gene2variant").gene2variant;
 var annotate = require("./annotate");
 
 function aggregate(gene2variantData, filterData, callback) {

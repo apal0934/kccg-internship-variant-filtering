@@ -8,7 +8,7 @@ var socketIo = require("socket.io");
 require("https").globalAgent.options.ca = require("ssl-root-cas/latest").create();
 
 var indexRouter = require("./routes/index");
-var g2v = require("./routes/gene2variant.js");
+var g2v = require("./routes/gene2variant.js").router;
 var p2s = require("./routes/patient2samples");
 var clincian = require("./routes/clinician.js");
 var researcher = require("./routes/researcher");

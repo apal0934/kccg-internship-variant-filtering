@@ -1,112 +1,102 @@
 var express = require("express");
 var router = express.Router();
-var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 var io = require("../socketApi").io;
 var axios = require("axios");
 
+function symbol2position(geneQuery, callback) {}
+
 function gene2variant(samples, geneQuery, callback) {
-  const url = "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
+  /* Send status update - Requesting Coordinates */
+  io.sockets.to("test").emit("progress", 0);
 
-  /* Split gene input into array to count how many genes */
-  const lines = geneQuery.genes ? geneQuery.genes.split(",") : [];
-  const numGenes = lines.length;
-
-  const body = JSON.stringify({
-    from: 0,
-    size: numGenes,
-    query: {
-      dis_max: {
-        queries: [
-          {
-            match: {
-              symbol: {
-                query: geneQuery.genes || "",
-                fuzziness: 0,
-                boost: 4
-              }
-            }
-          }
-        ],
-        tie_breaker: 0.4
-      }
-    },
-    sort: [{ _score: { order: "desc" } }]
-  });
+  /* Setup request */
+  var url = "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
   const config = {
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer fakeTokenForDemo"
     }
   };
-  io.sockets.to("test").emit("progress", 0);
-  axios.post(url, body, config).then(searchResult => {
-    /* If genes found, sort into CSVs of Chromosome, Position Start/End
-       Otherwise, assume region was given.
-       Region in format chromosome:start-end */
-    searchResult = searchResult.data;
-    var chromosome;
-    var positionStart;
-    var positionEnd;
 
-    if (searchResult.hits.hits[0]) {
-      chromosome = searchResult.hits.hits
-        .map(genes => {
-          return genes._source.chromosome;
-        })
-        .join(",");
+  /* arrays to hold data, i-th element of any array should correspond to i-th element in any other */
+  var chromosomes = [];
+  var positionStarts = [];
+  var positionEnds = [];
 
-      positionStart = searchResult.hits.hits
-        .map(genes => {
-          return genes._source.start;
-        })
-        .join(",");
+  /* If region provided, no need to query */
+  if (geneQuery.region) {
+    const lines = geneQuery.region.split(",");
+    lines.forEach(region => {
+      chromosomes.push(region.split(":")[0]);
+      positionStarts.push(region.split(":")[1].split("-")[0]);
+      positionEnds.push(region.split(":")[1].split("-")[1]);
+    });
+  }
 
-      positionEnd = searchResult.hits.hits
-        .map(genes => {
-          return genes._source.end;
-        })
-        .join(",");
-    } else {
-      const regionLines = geneQuery.region.split(/\r\n|\r|\n/);
+  var promises = [];
+  /* If gene symbols provided, request each symbol and store promise */
+  if (geneQuery.genes) {
+    const lines = geneQuery.genes.split(",");
 
-      chromosome = regionLines
-        .map(region => {
-          return region.split(":")[0];
-        })
-        .join(",");
+    lines.forEach(gene => {
+      const body = {
+        from: 0,
+        size: 1,
+        query: {
+          dis_max: {
+            queries: [
+              {
+                match: {
+                  symbol: {
+                    query: gene,
+                    fuzziness: 0,
+                    boost: 4
+                  }
+                }
+              }
+            ],
+            tie_breaker: 0.4
+          }
+        },
+        sort: [{ _score: { order: "desc" } }]
+      };
+      promises.push(axios.post(url, body, config));
+    });
+  }
 
-      positionStart = regionLines
-        .map(region => {
-          return region.split(":")[1].split("-")[0];
-        })
-        .join(",");
+  /* Evaluate promises */
+  axios.all(promises).then(results => {
+    results.forEach(result => {
+      chromosomes.push(result.data.hits.hits[0]._source.chromosome);
+      positionStarts.push(result.data.hits.hits[0]._source.start);
+      positionEnds.push(result.data.hits.hits[0]._source.end);
+    });
 
-      positionEnd = regionLines
-        .map(region => {
-          return region.split(":")[1].split("-")[1];
-        })
-        .join(",");
-    }
-
+    /* Send status update - Requesting Variants */
     io.sockets.to("test").emit("progress", 1);
 
     /* KCCG clinical filtering, retrieve variants on genes for samples */
-    const url = "https://vsal.garvan.org.au/vsal/core/find";
+    url = "https://vsal.garvan.org.au/vsal/core/find";
 
-    const body = JSON.stringify({
-      chromosome: chromosome,
-      positionStart: positionStart,
-      positionEnd: positionEnd,
+    var body = JSON.stringify({
+      chromosome: chromosomes.join(","),
+      positionStart: positionStarts.join(","),
+      positionEnd: positionEnds.join(","),
       limit: "10000",
       skip: 0,
       samples: samples.join(","),
       dataset: "demo"
     });
 
-    axios.post(url, body, config).then(res => {
-      callback(res.data);
-    });
+    axios
+      .post(url, body, config)
+      .then(res => {
+        callback(res.data);
+      })
+      .catch(error => {
+        console.log(error);
+      });
   });
 }
 
@@ -120,8 +110,12 @@ function gene2variant(samples, geneQuery, callback) {
     :attr str variants: do not use
 */
 router.post("/", function(req, res) {
-  res.send(gene2variant(res.body.samples, res.body.geneQuery));
+  gene2variant(req.body.samples, req.body.geneQuery, response => {
+    res.send(response);
+  });
 });
 
-module.exports = router;
-module.exports = gene2variant;
+module.exports = {
+  router: router,
+  gene2variant: gene2variant
+};
