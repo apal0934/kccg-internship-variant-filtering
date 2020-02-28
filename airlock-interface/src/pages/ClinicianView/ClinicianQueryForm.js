@@ -176,9 +176,7 @@ class ClinicianQuery extends Component {
               </Form.Item>
             </Col>
           </Row>
-        </Fade>
 
-        <Fade>
           <div>
             <Row>
               <Col span={8}>
@@ -221,9 +219,7 @@ class ClinicianQuery extends Component {
               </Col>
             </Row>
           </div>
-        </Fade>
 
-        <Fade>
           <h3>Bucket Settings</h3>
           <Form.Item>
             {getFieldDecorator("settings", {
@@ -236,9 +232,7 @@ class ClinicianQuery extends Component {
               </Radio.Group>
             )}
           </Form.Item>
-        </Fade>
 
-        <Fade>
           <Form.Item>
             <h4>Allele Frequency</h4>
             {getFieldDecorator("alleleFreq", {
@@ -254,18 +248,14 @@ class ClinicianQuery extends Component {
               />
             )}
           </Form.Item>
-        </Fade>
 
-        <Fade>
           <Form.Item>
             <h4>Minimum CADD Score</h4>
             {getFieldDecorator("cadd", {
               initialValue: 24
             })(<Slider disabled={!this.state.custom} step={1} max={30} />)}
           </Form.Item>
-        </Fade>
 
-        <Fade>
           <Row>
             <Col span={6}>
               <Form.Item>
@@ -322,9 +312,7 @@ class ClinicianQuery extends Component {
               </Form.Item>
             </Col>
           </Row>
-        </Fade>
 
-        <Fade>
           <Form.Item>
             <Button
               type="primary"

@@ -126,9 +126,7 @@ class ResearcherQuery extends Component {
               </Col>
             </Row>
           </div>
-        </Fade>
 
-        <Fade>
           <h3>Filter variants</h3>
           <Form.Item>
             {getFieldDecorator("filter", {
@@ -140,9 +138,7 @@ class ResearcherQuery extends Component {
               </Radio.Group>
             )}
           </Form.Item>
-        </Fade>
 
-        <Fade>
           <Row>
             <Col span={24}>
               <Form.Item label="In patients with..." help={""}>
@@ -157,8 +153,7 @@ class ResearcherQuery extends Component {
               </Form.Item>
             </Col>
           </Row>
-        </Fade>
-        <Fade>
+
           <Form.Item>
             <h4>Allele Frequency</h4>
             {getFieldDecorator("alleleFreq", {
@@ -174,18 +169,14 @@ class ResearcherQuery extends Component {
               />
             )}
           </Form.Item>
-        </Fade>
 
-        <Fade>
           <Form.Item>
             <h4>Minimum CADD Score</h4>
             {getFieldDecorator("cadd", {
               initialValue: 24
             })(<Slider disabled={!this.state.filter} step={1} max={30} />)}
           </Form.Item>
-        </Fade>
 
-        <Fade>
           <Row>
             <Col span={8}>
               <Form.Item>
@@ -229,9 +220,7 @@ class ResearcherQuery extends Component {
               </Form.Item>
             </Col>
           </Row>
-        </Fade>
 
-        <Fade>
           <Form.Item>
             <Button
               type="primary"
