@@ -42,7 +42,15 @@ export default class ClinicianResult extends Component {
       {
         title: "Gene",
         key: "gene",
-        dataIndex: "SYMBOL"
+        render: record => (
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://omim.org/search/?index=entry&start=1&search=${record.SYMBOL}&sort=score+desc%2C+prefix_sort+desc&limit=10&field=approved_gene_symbol`}
+          >
+            {record.SYMBOL}
+          </a>
+        )
       },
       {
         title: "Type",
@@ -62,7 +70,15 @@ export default class ClinicianResult extends Component {
       {
         title: "ClinVar",
         key: "clinvar",
-        dataIndex: "CLIN_SIG",
+        render: record => (
+          <a
+            href={`https://www.ncbi.nlm.nih.gov/snp/${record.Existing_variation}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {record.CLIN_SIG}
+          </a>
+        ),
         ellipsis: true
       },
       {
