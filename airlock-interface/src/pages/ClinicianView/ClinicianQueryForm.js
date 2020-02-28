@@ -314,7 +314,7 @@ class ClinicianQuery extends Component {
                 {getFieldDecorator("trio", {
                   initialValue: "false"
                 })(
-                  <Radio.Group>
+                  <Radio.Group disabled={true}>
                     <Radio.Button value="false">No</Radio.Button>
                     <Radio.Button value="true">Yes</Radio.Button>
                   </Radio.Group>
