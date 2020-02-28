@@ -87,11 +87,7 @@ class Patient extends Component {
                   message: "Date of birth is required"
                 }
               ]
-            })(
-              <div>
-                <DatePicker placeholder="YYYY-MM-DD" />
-              </div>
-            )}
+            })(<DatePicker placeholder="YYYY-MM-DD" />)}
           </Form.Item>
 
           <Form.Item wrapperCol={{ span: 14, offset: 4 }}>
