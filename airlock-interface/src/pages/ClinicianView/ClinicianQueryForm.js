@@ -182,12 +182,12 @@ class ClinicianQuery extends Component {
           <div>
             <Row>
               <Col span={8}>
-                <Card type="inner" title="Region">
+                <Card type="inner" title="Region - Chr:Start-End">
                   <Form.Item>
                     {getFieldDecorator("region")(
                       <TextArea
                         autoSize
-                        placeholder="Enter region or list of regions"
+                        placeholder="Enter region or list of regions (CSV)"
                       ></TextArea>
                     )}
                   </Form.Item>
@@ -199,7 +199,7 @@ class ClinicianQuery extends Component {
                     {getFieldDecorator("genes")(
                       <TextArea
                         autoSize
-                        placeholder="Enter gene or list of genes"
+                        placeholder="Enter gene or list of genes (CSV)"
                       ></TextArea>
                     )}
                   </Form.Item>
@@ -212,7 +212,7 @@ class ClinicianQuery extends Component {
                     {getFieldDecorator("variants")(
                       <TextArea
                         autoSize
-                        placeholder="Enter variant or list of variants"
+                        placeholder="Enter variant or list of variants (CSV)"
                         disabled
                       ></TextArea>
                     )}
