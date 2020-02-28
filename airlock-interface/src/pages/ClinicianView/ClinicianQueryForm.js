@@ -1,5 +1,4 @@
 import {
-  AutoComplete,
   Button,
   Card,
   Col,
@@ -7,107 +6,111 @@ import {
   Input,
   Radio,
   Row,
-  Slider
+  Select,
+  Slider,
+  Spin
 } from "antd";
 import React, { Component } from "react";
 
 import Fade from "react-reveal";
 import axios from "axios";
+import debounce from "lodash/debounce";
 
 const { TextArea } = Input;
-const AutoCompleteOption = AutoComplete.Option;
+const { Option } = Select;
 
 class ClinicianQuery extends Component {
+  constructor(props) {
+    super(props);
+    this.lastFetchId = 0;
+    this.onSearch = debounce(this.onSearch, 800);
+  }
   state = {
     autocompleteData: [],
     hpoGenes: [],
+    fetching: false,
     custom: false
   };
 
-  /* GET request to EBI for HPO autocomplete suggestions */
-  search(query) {
-    let url = `https://api.monarchinitiative.org/api/search/entity/autocomplete/${query}?category=phenotype&prefix=HP&rows=5&start=0&minimal_tokenizer=false`;
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.responseType = "json";
-    xhr.onload = () => {
-      let status = xhr.status;
-      if (status === 200) {
-        this.setState({
-          autocompleteData: xhr.response.docs
-        });
-      }
-    };
-    xhr.send();
-  }
-
-  /* 
-  Don't spam them with requests
-  Only send on substantial strings, and every second letter
-  */
   onSearch = query => {
-    if (query.length >= 3 && query.length % 2 === 0) this.search(query);
+    this.lastFetchId += 1;
+    const fetchId = this.lastFetchId;
+    this.setState({ autocompleteData: [], fetching: true });
+
+    let url = `https://api.monarchinitiative.org/api/search/entity/autocomplete/${query}?category=phenotype&prefix=HP&rows=5&start=0&minimal_tokenizer=false`;
+    axios.get(url).then(res => {
+      if (fetchId !== this.lastFetchId) {
+        return;
+      }
+      this.setState({
+        autocompleteData: res.data.docs,
+        fetching: false
+      });
+    });
   };
 
   onSelect = query => {
-    let url = `https://api.monarchinitiative.org/api/bioentity/phenotype/${query}/genes?rows=100&facet=false&unselect_evidence=false&exclude_automatic_assertions=false&fetch_objects=false&use_compact_associations=true&direct=false&direct_taxon=false`;
-    let xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.responseType = "json";
-    xhr.onload = () => {
-      let status = xhr.status;
-      if (status === 200) {
-        /* Use KCCG's gene elasticsearch to translate gene names to genome positions */
-        const url = "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
-        const config = {
-          headers: {
-            "Content-Type": "application/json"
-          }
-        };
+    let url = `https://api.monarchinitiative.org/api/bioentity/phenotype/${query.key}/genes?rows=100&facet=false&unselect_evidence=false&exclude_automatic_assertions=false&fetch_objects=false&use_compact_associations=true&direct=false&direct_taxon=false`;
 
-        var genes = [];
-        xhr.response.compact_associations.forEach(association => {
-          association.objects.forEach(gene => {
-            if (gene.startsWith("HGNC")) {
-              genes.push(gene.substring(5));
-            }
-          });
+    axios.get(url).then(response => {
+      /* Use KCCG's gene elasticsearch to translate gene names to genome positions */
+      url = "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
+      const config = {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+
+      var genes = [];
+      response.data.compact_associations.forEach(association => {
+        association.objects.forEach(gene => {
+          if (gene.startsWith("HGNC")) {
+            genes.push(gene.substring(5));
+          }
         });
-        const numGenes = genes.length;
-        const body = JSON.stringify({
-          from: 0,
-          size: numGenes,
-          query: {
-            dis_max: {
-              queries: [
-                {
-                  match: {
-                    description: {
-                      query: genes.join(" "),
-                      fuzziness: 1,
-                      boost: 4
-                    }
+      });
+
+      const numGenes = genes.length;
+      const body = {
+        from: 0,
+        size: numGenes,
+        query: {
+          dis_max: {
+            queries: [
+              {
+                match: {
+                  description: {
+                    query: genes.join(" "),
+                    fuzziness: 1,
+                    boost: 4
                   }
                 }
-              ],
-              tie_breaker: 0.4
-            }
-          },
-          sort: [{ _score: { order: "desc" } }]
+              }
+            ],
+            tie_breaker: 0.4
+          }
+        },
+        sort: [{ _score: { order: "desc" } }]
+      };
+
+      axios.post(url, body, config).then(res => {
+        const geneCSV = res.data.hits.hits
+          .map(gene => {
+            return gene._source.symbol;
+          })
+          .join(",");
+        const prevCSV = this.props.form.getFieldValue("genes");
+
+        this.props.form.setFieldsValue({
+          genes: prevCSV ? prevCSV + "," + geneCSV : geneCSV
         });
 
-        axios.post(url, body, config).then(res => {
-          this.props.form.setFieldsValue({
-            genes: res.data.hits.hits
-              .map(gene => {
-                return gene._source.symbol;
-              })
-              .join(",")
-          });
+        this.setState({
+          autocompleteData: [],
+          fetching: false
         });
-      }
-    };
-    xhr.send();
+      });
+    });
   };
 
   onChange = e => {
@@ -154,10 +157,6 @@ class ClinicianQuery extends Component {
   render() {
     const { getFieldDecorator, isFieldsTouched } = this.props.form;
 
-    const data = this.state.autocompleteData.map(hp => (
-      <AutoCompleteOption key={hp.id}>{hp.label}</AutoCompleteOption>
-    ));
-
     return (
       <Form layout="horizontal" onSubmit={this.handleSubmit}>
         <Fade>
@@ -165,13 +164,21 @@ class ClinicianQuery extends Component {
             <Col span={24}>
               <Form.Item label="Patient has phenotype..." help={""}>
                 {getFieldDecorator("hpo")(
-                  <AutoComplete
-                    dataSource={data}
+                  <Select
+                    mode="multiple"
+                    labelInValue
+                    placeholder={"HPO (optional)"}
+                    notFoundContent={
+                      this.state.fetching ? <Spin size="small" /> : null
+                    }
+                    filterOption={false}
                     onSearch={this.onSearch}
                     onSelect={query => this.onSelect(query)}
-                    placeholder={"HPO (optional)"}
-                    backfill
-                  />
+                  >
+                    {this.state.autocompleteData.map(hp => (
+                      <Option key={hp.id}>{hp.label}</Option>
+                    ))}
+                  </Select>
                 )}
               </Form.Item>
             </Col>
