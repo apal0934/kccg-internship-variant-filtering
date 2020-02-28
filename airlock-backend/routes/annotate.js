@@ -21,6 +21,22 @@ function annotate(geneData, filterData, aggregate, callback) {
   var type = {};
   var consequence = {};
 
+  variants.sort((a, b) => {
+    let comp = 0;
+    if (a.c < b.c) {
+      comp = -1;
+    } else if (a.c > b.c) {
+      comp = 1;
+    } else if (a.c === b.c) {
+      if (a.s < b.s) {
+        comp = -1;
+      } else {
+        comp = 1;
+      }
+    }
+    return comp;
+  });
+
   if (filterData.filter === "yes") {
     variants = variants.filter(gene => {
       return gene.af <= filterData.alleleFreq;
@@ -151,7 +167,8 @@ function annotate(geneData, filterData, aggregate, callback) {
           callback({
             clinvar: clinvarData,
             type: typeData,
-            consequence: consequenceData
+            consequence: consequenceData,
+            filtered: lines.length - 1
           });
         } else {
           callback(annotatedVariants);
