@@ -6,7 +6,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Card, Col, Layout, Row, Statistic } from "antd";
+import { Card, Col, Empty, Layout, Row, Statistic } from "antd";
 import React, { Component } from "react";
 
 const { Content } = Layout;
@@ -59,46 +59,55 @@ export default class ResearchResult extends Component {
             />
           </Col>
           <Col span={8}>
-            <Statistic
-              title="Variants"
-              value={this.props.geneData.stats.variants}
-            />
+            <Statistic title="Variants" value={this.props.geneData.filtered} />
           </Col>
         </Row>
       ),
-      tab2: (
-        <ResponsiveContainer width={"99%"} height={300}>
-          <BarChart data={this.props.geneData.clinvar} label={this.renderLabel}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      ),
-      tab3: (
-        <ResponsiveContainer width={"99%"} height={300}>
-          <BarChart data={this.props.geneData.type} label={this.renderLabel}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      ),
-      tab4: (
-        <ResponsiveContainer width={"99%"} height={300}>
-          <BarChart
-            data={this.props.geneData.consequence}
-            label={this.renderLabel}
-          >
-            <XAxis dataKey="name"></XAxis>
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      )
+      tab2:
+        this.props.geneData.clinvar.length >= 1 ? (
+          <ResponsiveContainer width={"99%"} height={300}>
+            <BarChart
+              data={this.props.geneData.clinvar}
+              label={this.renderLabel}
+            >
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <Empty description="Not enough data found :(" />
+        ),
+      tab3:
+        this.props.geneData.type.length >= 1 ? (
+          <ResponsiveContainer width={"99%"} height={300}>
+            <BarChart data={this.props.geneData.type} label={this.renderLabel}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <Empty description="Not enough data found :(" />
+        ),
+      tab4:
+        this.props.geneData.consequence.length >= 1 ? (
+          <ResponsiveContainer width={"99%"} height={300}>
+            <BarChart
+              data={this.props.geneData.consequence}
+              label={this.renderLabel}
+            >
+              <XAxis dataKey="name"></XAxis>
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <Empty description="Not enough data found :(" />
+        )
     };
 
     return (
