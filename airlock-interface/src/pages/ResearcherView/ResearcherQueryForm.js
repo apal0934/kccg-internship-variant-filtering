@@ -75,7 +75,11 @@ class ResearcherQuery extends Component {
   };
 
   render() {
-    const { getFieldDecorator, isFieldsTouched } = this.props.form;
+    const {
+      getFieldDecorator,
+      isFieldsTouched,
+      getFieldValue
+    } = this.props.form;
 
     const data = this.state.autocompleteData.map(hp => (
       <AutoCompleteOption key={hp.id}>{hp.label}</AutoCompleteOption>
@@ -86,39 +90,33 @@ class ResearcherQuery extends Component {
         <Fade>
           <div>
             <Row>
-              <Col span={8}>
+              <Col span={12}>
                 <Card type="inner" title="Region">
                   <Form.Item>
                     {getFieldDecorator("region")(
                       <TextArea
                         autoSize
                         placeholder="Enter region or list of regions"
+                        disabled={
+                          getFieldValue("genes") &&
+                          getFieldValue("genes") !== ""
+                        }
                       ></TextArea>
                     )}
                   </Form.Item>
                 </Card>
               </Col>
-              <Col span={8}>
+              <Col span={12}>
                 <Card type="inner" title="Genes">
                   <Form.Item>
                     {getFieldDecorator("genes")(
                       <TextArea
                         autoSize
                         placeholder="Enter gene or list of genes"
-                      ></TextArea>
-                    )}
-                  </Form.Item>
-                </Card>
-              </Col>
-
-              <Col span={8}>
-                <Card type="inner" title="Variants">
-                  <Form.Item>
-                    {getFieldDecorator("variants")(
-                      <TextArea
-                        autoSize
-                        placeholder="Enter variant or list of variants"
-                        disabled
+                        disabled={
+                          getFieldValue("region") &&
+                          getFieldValue("region") !== ""
+                        }
                       ></TextArea>
                     )}
                   </Form.Item>

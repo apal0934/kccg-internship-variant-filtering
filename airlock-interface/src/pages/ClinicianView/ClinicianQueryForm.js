@@ -155,7 +155,11 @@ class ClinicianQuery extends Component {
   };
 
   render() {
-    const { getFieldDecorator, isFieldsTouched } = this.props.form;
+    const {
+      getFieldDecorator,
+      isFieldsTouched,
+      getFieldValue
+    } = this.props.form;
 
     return (
       <Form layout="horizontal" onSubmit={this.handleSubmit}>
@@ -186,39 +190,33 @@ class ClinicianQuery extends Component {
 
           <div>
             <Row>
-              <Col span={8}>
+              <Col span={12}>
                 <Card type="inner" title="Region - Chr:Start-End">
                   <Form.Item>
                     {getFieldDecorator("region")(
                       <TextArea
                         autoSize
                         placeholder="Enter region or list of regions (CSV)"
+                        disabled={
+                          getFieldValue("genes") &&
+                          getFieldValue("genes") !== ""
+                        }
                       ></TextArea>
                     )}
                   </Form.Item>
                 </Card>
               </Col>
-              <Col span={8}>
+              <Col span={12}>
                 <Card type="inner" title="Genes">
                   <Form.Item>
                     {getFieldDecorator("genes")(
                       <TextArea
                         autoSize
                         placeholder="Enter gene or list of genes (CSV)"
-                      ></TextArea>
-                    )}
-                  </Form.Item>
-                </Card>
-              </Col>
-
-              <Col span={8}>
-                <Card type="inner" title="Variants">
-                  <Form.Item>
-                    {getFieldDecorator("variants")(
-                      <TextArea
-                        autoSize
-                        placeholder="Enter variant or list of variants (CSV)"
-                        disabled
+                        disabled={
+                          getFieldValue("region") &&
+                          getFieldValue("region") !== ""
+                        }
                       ></TextArea>
                     )}
                   </Form.Item>
@@ -301,19 +299,6 @@ class ClinicianQuery extends Component {
                   <Radio.Group disabled={!this.state.custom}>
                     <Radio.Button value="or">||</Radio.Button>
                     <Radio.Button value="and">&&</Radio.Button>
-                  </Radio.Group>
-                )}
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item>
-                <h4>Query on Family? (Only if exists)</h4>
-                {getFieldDecorator("trio", {
-                  initialValue: "false"
-                })(
-                  <Radio.Group disabled={true}>
-                    <Radio.Button value="false">No</Radio.Button>
-                    <Radio.Button value="true">Yes</Radio.Button>
                   </Radio.Group>
                 )}
               </Form.Item>
