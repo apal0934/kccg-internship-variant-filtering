@@ -6,7 +6,7 @@ This is restricted to an extremely limited scope as only one component of a larg
 
 ## Scope
 
-- Clincian (WIP)
+- Clincian
   - Validate and confirm details (Done)
   - Retrieve consenting patient variants (Done)
   - Filter variants to potential causes based on the KCCG Orrery pipeline (Done)
