@@ -59,14 +59,16 @@ function annotate(geneData, filterData, aggregate, callback) {
     data += `+\n`;
   });
 
-  /* Write to a file VEP can read. This kind of path hard coding is bad but hey it's just a prototype */
-  fs.writeFile("/Users/alexpalmer/ensembl-vep/variants.txt", data, err => {
+  /* Write to a file VEP can read. */
+  fs.writeFile(process.env.VEP_PATH + "/variants.txt", data, err => {
     if (err) throw err;
     /* Setup initial command */
     /* This will not work on other machines, sorry :( */
 
-    var command =
-      'source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,../whole_genome_SNVs.tsv.gz,../InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout --filter "SYMBOL exists" ';
+    var command = `source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,${process
+      .env.CADD_SNV_PATH + "whole_genome_SNVs.tsv.gz"},${process.env
+      .CADD_INDEL_PATH +
+      "/InDels.tsv.gz"} --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout --filter "SYMBOL exists" `;
     /* Add AF, CADD and ClinVar filters */
     if (filterData.filter === "yes") {
       command += `--filter "(AF < ${filterData.alleleFreq} or not AF) and (CADD_PHRED >= ${filterData.cadd} ${filterData.operator} (CLIN_SIG match ${filterData.clinvar} and CLIN_SIG != not_provided) ${filterData.operator} `;
@@ -101,7 +103,7 @@ function annotate(geneData, filterData, aggregate, callback) {
     exec(
       command,
       {
-        cwd: "/Users/alexpalmer/ensembl-vep/",
+        cwd: process.env.VEP_PATH,
         encoding: "utf-8"
       },
       (err, output) => {

@@ -14,7 +14,7 @@ export default class ClinicianQueryValidation extends Component {
   };
 
   componentDidMount() {
-    const url = "http://localhost:3001/clinician";
+    const url = "http://" + process.env.REACT_APP_BACKEND_IP + "/clinician";
     const body = {
       gene2variantData: {
         samples: [this.props.mappingData],
@@ -34,7 +34,7 @@ export default class ClinicianQueryValidation extends Component {
         cadd: this.props.formQueryValues.cadd
       }
     };
-    const socket = socketIOClient.connect("http://localhost:3001", {
+    const socket = socketIOClient.connect(process.env.REACT_APP_BACKEND_IP, {
       transports: ["websocket"]
     });
     socket.on("progress", data => {

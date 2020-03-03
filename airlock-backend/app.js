@@ -5,6 +5,7 @@ var cors = require("cors");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var socketIo = require("socket.io");
+require("dotenv").config();
 require("https").globalAgent.options.ca = require("ssl-root-cas/latest").create();
 
 var indexRouter = require("./routes/index");

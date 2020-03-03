@@ -12,8 +12,6 @@ import Researcher from "./pages/ResearcherView/Researcher";
 const { Footer } = Layout;
 
 function App() {
-  const IP = "localhost";
-
   return (
     <div>
       <Router>
@@ -21,16 +19,8 @@ function App() {
           <Header />
           <Switch>
             <Route exact path="/" component={Landing} />
-            <Route
-              exact
-              path="/clinician"
-              render={() => <Clinician IP={IP} />}
-            />
-            <Route
-              exact
-              path="/researcher"
-              render={() => <Researcher IP={IP} />}
-            />
+            <Route exact path="/clinician" render={() => <Clinician />} />
+            <Route exact path="/researcher" render={() => <Researcher />} />
           </Switch>
           <Footer style={{ textAlign: "center" }}>Proof of Concept Only</Footer>
         </Layout>

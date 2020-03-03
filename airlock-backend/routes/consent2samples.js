@@ -3,7 +3,7 @@ var router = express.Router();
 var axios = require("axios");
 
 function consent2samples(consentData, callback) {
-  var url = "http://localhost:8000";
+  var url = process.env.DYNAMIC_CONSENT_IP;
   var body = JSON.stringify({
     query: `query UserQuery(
         $consentOrg: Int
@@ -35,7 +35,7 @@ function consent2samples(consentData, callback) {
   axios
     .post(url, body, config)
     .then(userRes => {
-      url = "http://localhost:7000";
+      url = process.env.GENE_TRUSTEE_IP;
       body = JSON.stringify({
         query: `
           query GenomeQuery($userIds: [Int]) {

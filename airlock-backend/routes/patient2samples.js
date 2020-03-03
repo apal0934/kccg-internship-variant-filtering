@@ -3,7 +3,7 @@ var router = express.Router();
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 function patient2samples(firstName, lastName, dateOfBirth) {
-  var url = "http://localhost:8000";
+  var url = process.env.DYNAMIC_CONSENT_IP;
   var body = JSON.stringify({
     query: `query UserQuery(
             $firstName: String
@@ -38,7 +38,7 @@ function patient2samples(firstName, lastName, dateOfBirth) {
     case 200:
       var data = {};
       data["user"] = JSON.parse(request.responseText).data.user;
-      url = "http://localhost:7000";
+      url = process.env.GENE_TRUSTEE_IP;
       body = JSON.stringify({
         query: `
               query mappingQuery($userId: Int) {

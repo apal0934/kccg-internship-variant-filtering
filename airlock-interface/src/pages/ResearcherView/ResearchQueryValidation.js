@@ -16,7 +16,7 @@ class ResearchValidation extends Component {
   };
 
   componentDidMount() {
-    const url = "http://localhost:3001/researcher";
+    const url = "http://" + process.env.REACT_APP_BACKEND_IP + "/researcher";
     const body = {
       consentData: {
         consentOrg: this.props.formIntentionValues.orgType,
@@ -44,7 +44,7 @@ class ResearchValidation extends Component {
         cadd: this.props.formQueryValues.cadd
       }
     };
-    const socket = socketIOClient.connect("http://localhost:3001", {
+    const socket = socketIOClient.connect(process.env.REACT_APP_BACKEND_IP, {
       transports: ["websocket"]
     });
     socket.on("progress", data => {
