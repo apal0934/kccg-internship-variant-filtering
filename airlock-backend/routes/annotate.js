@@ -66,7 +66,7 @@ function annotate(geneData, filterData, aggregate, callback) {
     /* This will not work on other machines, sorry :( */
 
     var command = `source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CLIN_SIG,CADD_PHRED" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,${process
-      .env.CADD_SNV_PATH + "whole_genome_SNVs.tsv.gz"},${process.env
+      .env.CADD_SNV_PATH + "/whole_genome_SNVs.tsv.gz"},${process.env
       .CADD_INDEL_PATH +
       "/InDels.tsv.gz"} --symbol --pick -o stdout --no_stats --offline | ./filter_vep -o stdout --filter "SYMBOL exists" `;
     /* Add AF, CADD and ClinVar filters */
