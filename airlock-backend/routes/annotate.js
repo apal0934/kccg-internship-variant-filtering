@@ -95,7 +95,6 @@ function annotate(geneData, filterData, aggregate, callback) {
           break;
       }
     }
-    console.log(command);
     io.sockets.to("test").emit("progress", 2);
 
     exec(
@@ -106,13 +105,11 @@ function annotate(geneData, filterData, aggregate, callback) {
       },
       (err, output) => {
         if (err) throw err;
-        console.log(output);
-        console.log(err);
         io.sockets.to("test").emit("progress", 3);
         /* Split output into lines */
         var lines = output.split("\n");
         /* Reduce to header + data */
-        lines = lines.slice(33, lines.length - 1);
+        lines = lines.slice(34, lines.length - 1);
         /* Isolate header */
         const headers = lines[0].split("\t");
         const annotatedVariants = [];
