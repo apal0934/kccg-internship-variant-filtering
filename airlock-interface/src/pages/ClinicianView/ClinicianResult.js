@@ -76,7 +76,7 @@ export default class ClinicianResult extends Component {
             target="_blank"
             rel="noopener noreferrer"
           >
-            {record.CLIN_SIG}
+            {record.ClinVar_CLNSIG}
           </a>
         ),
         ellipsis: true
@@ -85,6 +85,11 @@ export default class ClinicianResult extends Component {
         title: "CADD",
         key: "cadd",
         dataIndex: "CADD_PHRED"
+      },
+      {
+        title: "Associated diseases (if any)",
+        key: "dsx",
+        dataIndex: "ClinVar_CLNDN"
       }
     ];
 
