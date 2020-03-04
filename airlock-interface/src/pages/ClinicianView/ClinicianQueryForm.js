@@ -50,8 +50,12 @@ class ClinicianQuery extends Component {
   };
 
   onSelect = query => {
-    let url = `https://api.monarchinitiative.org/api/bioentity/phenotype/${query.key}/genes?rows=100&facet=false&unselect_evidence=false&exclude_automatic_assertions=false&fetch_objects=false&use_compact_associations=true&direct=false&direct_taxon=false`;
+    this.setState({
+      autocompleteData: [],
+      fetching: false
+    });
 
+    let url = `https://api.monarchinitiative.org/api/bioentity/phenotype/${query.key}/genes?rows=100&facet=false&unselect_evidence=false&exclude_automatic_assertions=false&fetch_objects=false&use_compact_associations=true&direct=false&direct_taxon=false`;
     axios.get(url).then(response => {
       /* Use KCCG's gene elasticsearch to translate gene names to genome positions */
       url = "https://dr-sgc.kccg.garvan.org.au/_elasticsearch/_search";
@@ -103,11 +107,6 @@ class ClinicianQuery extends Component {
 
         this.props.form.setFieldsValue({
           genes: prevCSV ? prevCSV + "," + geneCSV : geneCSV
-        });
-
-        this.setState({
-          autocompleteData: [],
-          fetching: false
         });
       });
     });
