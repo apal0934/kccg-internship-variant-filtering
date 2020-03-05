@@ -127,8 +127,8 @@ function annotate(geneData, filterData, aggregate, callback) {
 
           /* If research aggregation, count all occurances of each */
           if (aggregate) {
-            clinvar[annotatedVariant.CLIN_SIG] =
-              (clinvar[annotatedVariant.CLIN_SIG] || 0) + 1;
+            clinvar[annotatedVariant.ClinVar_CLNSIG] =
+              (clinvar[annotatedVariant.ClinVar_CLNSIG] || 0) + 1;
             type[annotatedVariant.VARIANT_CLASS] =
               (type[annotatedVariant.VARIANT_CLASS] || 0) + 1;
             consequence[annotatedVariant.Consequence] =
