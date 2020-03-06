@@ -35,7 +35,11 @@ export default class ClinicianResult extends Component {
         title: "Variant",
         key: "variant",
         render: record => (
-          <div>{`${record.Location}${record.REF_ALLELE}>${record.Allele}`}</div>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://varsome.com/variant/hg19/${record.Existing_variation}`}
+          >{`${record.Location}${record.REF_ALLELE}>${record.Allele}`}</a>
         ),
         ellipsis: true
       },
@@ -60,7 +64,16 @@ export default class ClinicianResult extends Component {
       {
         title: "Allele Freq",
         key: "alleleFreq",
-        render: record => <div>{`${(record.AF * 100).toFixed(2)}%`}</div>
+        render: record => (
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href={`https://gnomad.broadinstitute.org/variant/${record.Location.replace(
+              ":",
+              "-"
+            )}-${record.REF_ALLELE}-${record.Allele}?dataset=gnomad_r2_1`}
+          >{`${(record.AF * 100).toFixed(2)}%`}</a>
+        )
       },
       {
         title: "Impact",
@@ -89,7 +102,14 @@ export default class ClinicianResult extends Component {
       {
         title: "Associated diseases (if any)",
         key: "dsx",
-        dataIndex: "ClinVar_CLNDN"
+        render: record => {
+          record.ClinVar_CLNDN.split("|").map(disease => {
+            if (disease !== "not_provided" || disease !== "not_specified") {
+              return <div>disease</div>;
+            }
+            return null;
+          });
+        }
       }
     ];
 
