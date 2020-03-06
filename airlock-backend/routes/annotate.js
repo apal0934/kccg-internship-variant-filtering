@@ -109,7 +109,7 @@ function annotate(geneData, filterData, aggregate, callback) {
         /* Split output into lines */
         var lines = output.split("\n");
         /* Reduce to header + data */
-        lines = lines.slice(52, lines.length - 1);
+        lines = lines.slice(54, lines.length - 1);
         /* Isolate header */
         const headers = lines[0].split("\t");
         const annotatedVariants = [];

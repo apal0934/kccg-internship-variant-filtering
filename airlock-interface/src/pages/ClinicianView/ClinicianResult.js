@@ -35,7 +35,7 @@ export default class ClinicianResult extends Component {
         title: "Variant",
         key: "variant",
         render: record => (
-          <div>{`${record["#Location"]}${record.REF_ALLELE}>${record.Allele}`}</div>
+          <div>{`${record["Location"]}${record.REF_ALLELE}>${record.Allele}`}</div>
         ),
         ellipsis: true
       },
