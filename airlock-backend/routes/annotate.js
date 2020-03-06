@@ -65,7 +65,7 @@ function annotate(geneData, filterData, aggregate, callback) {
     /* Setup initial command */
     /* This will not work on other machines, sorry :( */
 
-    var command = `source ~/.bash_profile && ./vep --cache -i variants.txt --tab --fields "Location,Allele,Consequence,Existing_variation,REF_ALLELE,IMPACT,VARIANT_CLASS,SYMBOL,AF,CADD_PHRED,ClinVar_CLNSIG,ClinVar_CLNDN" --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,whole_genome_SNVs.tsv.gz,InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline --custom clinvar.vcf.gz,ClinVar,vcf,exact,0,CLNSIG,CLNDN | ./filter_vep -o stdout --filter "SYMBOL exists" `;
+    var command = `source ~/.bash_profile && ./vep --cache -i variants.txt --tab --show_ref_allele --variant_class --port 3337 -af --check_existing --plugin CADD,whole_genome_SNVs.tsv.gz,InDels.tsv.gz --symbol --pick -o stdout --no_stats --offline --custom clinvar.vcf.gz,ClinVar,vcf,exact,0,CLNSIG,CLNDN | ./filter_vep -o stdout --filter "SYMBOL exists" `;
     /* Add AF, CADD and ClinVar filters */
     if (filterData.filter === "yes") {
       command += `--filter "(AF < ${filterData.alleleFreq} or not AF) and (CADD_PHRED >= ${filterData.cadd} ${filterData.operator} (CLIN_SIG match ${filterData.clinvar} and CLIN_SIG != not_provided) ${filterData.operator} `;
@@ -109,7 +109,7 @@ function annotate(geneData, filterData, aggregate, callback) {
         /* Split output into lines */
         var lines = output.split("\n");
         /* Reduce to header + data */
-        lines = lines.slice(34, lines.length - 1);
+        lines = lines.slice(52, lines.length - 1);
         /* Isolate header */
         const headers = lines[0].split("\t");
         const annotatedVariants = [];
