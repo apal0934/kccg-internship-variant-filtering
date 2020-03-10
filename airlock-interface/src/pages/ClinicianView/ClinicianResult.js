@@ -103,13 +103,20 @@ export default class ClinicianResult extends Component {
         title: "Associated diseases (if any)",
         key: "dsx",
         render: record => {
-          record.ClinVar_CLNDN.split("|").map(disease => {
-            if (disease !== "not_provided" || disease !== "not_specified") {
-              return <div>disease</div>;
-            }
-            return null;
-          });
-        }
+	    if (record.ClinVar_CLNDN !== "-") {
+	        return (
+		    <div>
+		        {record.ClinVar_CLNDN.split("|").map(disease => {
+				if (disease !== "not_specified" && disease !== "not_provided") {
+					return (<div>{disease}</div>)
+				}
+			})}
+		    </div>
+		)
+	    }
+	   return "-"
+	}
+          
       }
     ];
 
