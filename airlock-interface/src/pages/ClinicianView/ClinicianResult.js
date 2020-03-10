@@ -113,7 +113,7 @@ export default class ClinicianResult extends Component {
                     disease !== "not_provided"
                   ) {
                     return (
-                      <div>{disease.replace("_", " ").replace("-", " ")}</div>
+                      <div>{disease.replace(/_/g, " ").replace(/-/g, " ")}</div>
                     );
                   }
                   return null;
