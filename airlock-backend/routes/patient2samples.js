@@ -15,7 +15,7 @@ function patient2samples(firstName, lastName, dateOfBirth) {
               lastName: $lastName
               dateOfBirth: $dateOfBirth
             ) {
-              userId
+              id
               firstName
               lastName
               email
@@ -41,14 +41,14 @@ function patient2samples(firstName, lastName, dateOfBirth) {
       url = "http://" + process.env.GENE_TRUSTEE_IP;
       body = JSON.stringify({
         query: `
-              query mappingQuery($userId: Int) {
+              query mappingQuery($userId: String) {
                 userToGenome(userId: $userId) {
                   genomeId
                 }
               }
             `,
         variables: {
-          userId: data["user"].userId
+          userId: data["user"].id
         }
       });
       request = new XMLHttpRequest();

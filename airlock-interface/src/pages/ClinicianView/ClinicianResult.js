@@ -144,7 +144,7 @@ export default class ClinicianResult extends Component {
           <Col span={8}>
             <Statistic
               title="IDs"
-              value={`${this.props.userData.userId}; ${
+              value={`${this.props.userData.id}; ${
                 this.props.geneData[this.props.geneData.length - 1].samples[0]
               }`}
             />

@@ -35,7 +35,7 @@ class PatientConfirmation extends Component {
               {this.props.userData.dateOfBirth.split("T")[0]}
             </Descriptions.Item>
             <Descriptions.Item label="Patient ID">
-              {this.props.userData.userId}
+              {this.props.userData.id}
             </Descriptions.Item>
             <Descriptions.Item label="Sample ID">
               {this.props.mappingData}

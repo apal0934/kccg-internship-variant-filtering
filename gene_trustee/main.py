@@ -10,8 +10,8 @@ from gene_trustee.mutations.mutations import Mutations
 
 
 class Query(graphene.ObjectType):
-    user_to_genome = graphene.Field(Mapping, user_id=graphene.Int())
-    users_to_genomes = graphene.List(Mapping, user_ids=graphene.List(graphene.Int))
+    user_to_genome = graphene.Field(Mapping, user_id=graphene.String())
+    users_to_genomes = graphene.List(Mapping, user_ids=graphene.List(graphene.String))
 
     def resolve_user_to_genome(self, info, user_id):
         return MappingModel.objects.get(user_id=user_id)
@@ -33,13 +33,13 @@ def shutdown_db_client():
     disconnect_all
 
 
-origins = ['*']
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 app.add_route("/", GraphQLApp(schema=graphene.Schema(query=Query, mutation=Mutations)))

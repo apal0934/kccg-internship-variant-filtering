@@ -15,7 +15,7 @@ function consent2samples(consentData, callback) {
           consentPurpose: $consentPurpose
           consentHpos: $consentHpos
         ) {
-          userId
+          id
           firstName
           lastName
           email
@@ -38,7 +38,7 @@ function consent2samples(consentData, callback) {
       url = "http://" + process.env.GENE_TRUSTEE_IP;
       body = JSON.stringify({
         query: `
-          query GenomeQuery($userIds: [Int]) {
+          query GenomeQuery($userIds: [String]) {
             usersToGenomes(userIds: $userIds) {
               userId
               genomeId
@@ -47,7 +47,7 @@ function consent2samples(consentData, callback) {
         `,
         variables: {
           userIds: userRes.data.data.users.map(user => {
-            return user.userId;
+            return user.id;
           })
         }
       });
