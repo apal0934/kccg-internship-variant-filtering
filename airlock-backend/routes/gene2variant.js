@@ -25,13 +25,35 @@ function gene2variant(samples, geneQuery, callback) {
   var positionEnds = [];
 
   /* If region provided, no need to query */
-  if (geneQuery.region) {
-    const lines = geneQuery.region.split(",");
+  if (geneQuery.regions) {
+    const lines = geneQuery.regions.split(",");
     lines.forEach(region => {
       chromosomes.push(region.split(":")[0]);
       positionStarts.push(region.split(":")[1].split("-")[0]);
       positionEnds.push(region.split(":")[1].split("-")[1]);
     });
+    /* KCCG clinical filtering, retrieve variants on genes for samples */
+    url = "https://vsal.garvan.org.au/vsal/core/find";
+
+    var body = JSON.stringify({
+      chromosome: chromosomes.join(","),
+      positionStart: positionStarts.join(","),
+      positionEnd: positionEnds.join(","),
+      limit: "10000",
+      skip: 0,
+      samples: samples.join(","),
+      dataset: "demo"
+    });
+
+    axios
+      .post(url, body, config)
+      .then(res => {
+        callback(res.data);
+      })
+      .catch(error => {
+        console.log(error);
+        throw error;
+      });
   }
 
   var promises = [];
